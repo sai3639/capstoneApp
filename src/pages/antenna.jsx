@@ -5,21 +5,21 @@ const styles = {
         minHeight: "100vh",
         background: "linear-gradient(to bottom, #0f172a, #1e3a8a, #0f172a)",
         color: "#e2e8f0",
-        padding: "2rem",
+        padding: "4rem",
         fontFamily: "system-ui, -apple-system, sans-serif",
     },
     contentWrapper: {
-        maxWidth: "1200px",
+        maxWidth: "1400px",
         margin: "0 auto",
     },
     header: {
         display: "flex",
         alignItems: "center",
-        gap: "1rem",
-        marginBottom: "2rem",
+        gap: "2rem",
+        marginBottom: "4rem",
     },
     title: {
-        fontSize: "2rem",
+        fontSize: "4rem",
         fontWeight: "bold",
         background: "linear-gradient(to right, #60a5fa, #a78bfa)",
         WebkitBackgroundClip: "text",
@@ -29,55 +29,71 @@ const styles = {
     card: {
         background: "rgba(17, 24, 39, 0.7)",
         backdropFilter: "blur(10px)",
-        borderRadius: "0.75rem",
+        borderRadius: "1rem",
         border: "1px solid rgba(55, 65, 81, 0.5)",
-        padding: "1.5rem",
-        marginBottom: "2rem",
+        padding: "3rem",
+        marginBottom: "3rem",
     },
     select: {
         background: "#1f2937",
         color: "#e2e8f0",
-        padding: "0.5rem 1rem",
+        padding: "1rem 1.5rem",
         borderRadius: "0.5rem",
         border: "1px solid rgba(75, 85, 99, 0.5)",
         marginLeft: "1rem",
-        fontSize: "1rem",
+        fontSize: "1.5rem",
         cursor: "pointer",
     },
     textarea: {
         width: "100%",
         background: "#1f2937",
         color: "#e2e8f0",
-        padding: "0.75rem",
+        padding: "1.5rem",
         borderRadius: "0.5rem",
         border: "1px solid rgba(75, 85, 99, 0.5)",
-        marginBottom: "1rem",
-        fontSize: "1rem",
+        marginBottom: "1.5rem",
+        fontSize: "1.25rem",
         resize: "vertical",
-        minHeight: "100px",
+        minHeight: "200px",
     },
     button: {
         background: "#3b82f6",
         color: "white",
-        padding: "0.75rem 1.5rem",
+        padding: "1.5rem 3rem",
         borderRadius: "0.5rem",
         border: "none",
-        fontSize: "1rem",
+        fontSize: "1.5rem",
         cursor: "pointer",
         transition: "all 0.2s ease",
+    },
+    commandTable: {
+        width: "100%",
+        borderCollapse: "collapse",
+        marginTop: "3rem",
+        fontSize: "1.25rem",
+    },
+    tableHeader: {
+        background: "rgba(17, 24, 39, 0.7)",
+        color: "#60a5fa",
+        fontWeight: "bold",
+    },
+    tableCell: {
+        border: "1px solid rgba(75, 85, 99, 0.5)",
+        padding: "1.5rem",
+        textAlign: "left",
     },
     logsGrid: {
         display: "grid",
         gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-        gap: "1.5rem",
-        margin: "2rem 0",
+        gap: "2em",
+        margin: "3rem 0",
     },
     logCard: {
         background: "rgba(17, 24, 39, 0.7)",
         backdropFilter: "blur(10px)",
-        borderRadius: "0.75rem",
+        borderRadius: "1rem",
         border: "1px solid rgba(55, 65, 81, 0.5)",
-        padding: "1.5rem",
+        padding: "2rem",
         transition: "all 0.3s ease",
         position: "relative",
         overflow: "hidden",
@@ -91,11 +107,11 @@ const styles = {
     callsign: {
         color: "#60a5fa",
         fontWeight: "bold",
-        fontSize: "1.1rem",
+        fontSize: "1.5rem",
     },
     logContent: {
         color: "#d1d5db",
-        marginBottom: "1rem",
+        marginBottom: "1.5rem",
         lineHeight: "1.5",
     },
     timestamp: {
@@ -103,7 +119,7 @@ const styles = {
         alignItems: "center",
         gap: "0.5rem",
         color: "#9ca3af",
-        fontSize: "0.875rem",
+        fontSize: "1rem",
     },
     icon: {
         color: "#60a5fa",
@@ -139,52 +155,108 @@ const Antenna = ({ userType, callsign }) => {
     const [logs, setLogs] = useState([]);
     const [selectedCallsign, setSelectedCallsign] = useState(callsign || "");
     const [filteredLogs, setFilteredLogs] = useState([]);
-
+    const [activeCommand, setActiveCommand] = useState(null);
+    const [sessionStatus, setSessionStatus] = useState(null);
+  
+    const commandTable = [
+      { command: "Deploy Antenna", description: "Unfold antennas on CubeSat" },
+      { command: "Ping CubeSat", description: "Send diagnostic ping to verify CubeSat communication status" }
+    ];
+  
     const fetchLogs = async () => {
-        try {
-            const response = await fetch("http://localhost:8888/logs");
-            const data = await response.json();
-            setLogs(data);
-            
-            if (selectedCallsign) {
-                const filtered = data.filter(log => log.callsign === selectedCallsign);
-                setFilteredLogs(filtered);
-            } else {
-                setFilteredLogs(data);
-            }
-        } catch (error) {
-            console.error("Error fetching logs:", error);
+      try {
+        const response = await fetch("http://localhost:8888/logs", { 
+          credentials: "include" // for sending cookies 
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
+        const data = await response.json();
+        setLogs(data);
+        
+        if (selectedCallsign) {
+          const filtered = data.filter(log => log.callsign === selectedCallsign);
+          setFilteredLogs(filtered);
+        } else {
+          setFilteredLogs(data);
+        }
+      } catch (error) {
+        console.error("Error fetching logs:", error);
+        alert(`Failed to fetch logs: ${error.message}`);
+      }
     };
+  
+    const verifySession = async () => {
+      try {
+        const response = await fetch("http://localhost:8888/verify-session", {
+          method: 'GET',
+          credentials: "include" // for sending cookies
+        });
+        
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+  
+        const data = await response.json();
+        
+        if (data.success) {
+          setSelectedCallsign(data.callsign);
+          setSessionStatus("valid");
+          console.log("Session is valid for callsign:", data.callsign);
+          fetchLogs(); // Automatically fetch logs after successful session verification
+        } else {
+          setSessionStatus("invalid");
+          console.log("Session invalid. Please log in again.");
+          // redirect to login page or show login modal
+          navigate('/login');
 
+        }
+      } catch (error) {
+        console.error("Error verifying session:", error);
+        setSessionStatus("error");
+        alert(`Session verification failed: ${error.message}`);
+      }
+    };
+  
     useEffect(() => {
-        fetchLogs();
-    }, [selectedCallsign]);
-
+      verifySession();
+    }, []);
+  
     const handleLogSubmit = async () => {
-        if (userType === "guest") {
-            alert("Guest users are not allowed to add logs");
-            return;
+      if (userType === "guest" || sessionStatus !== "valid") {
+        alert("Unable to add log. Please check your session and user type.");
+        return;
+      }
+  
+      try {
+        const response = await fetch("http://localhost:8888/add-log", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ 
+            callsign: selectedCallsign, 
+            telemetry_data: telemetryData 
+          })
+        });
+  
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          alert(data.message);
+          setTelemetryData("");
+          fetchLogs(); // Refresh logs after successful submission
+        } else {
+          alert(data.message || "Failed to add log");
         }
-
-        try {
-            const response = await fetch("http://localhost:8888/add-log", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ callsign: selectedCallsign, telemetry_data: telemetryData }),
-            });
-            const data = await response.json();
-
-            if (data.success) {
-                alert(data.message);
-                setTelemetryData("");
-                fetchLogs();
-            } else {
-                alert(data.message);
-            }
-        } catch (error) {
-            console.error("Error submitting log:", error);
-        }
+      } catch (error) {
+        console.error("Error submitting log:", error);
+        alert(`Error submitting log: ${error.message}`);
+      }
     };
 
     const uniqueCallsigns = [...new Set(logs.map((log) => log.callsign))];
@@ -194,6 +266,30 @@ const Antenna = ({ userType, callsign }) => {
             <div style={styles.contentWrapper}>
                 <div style={styles.header}>
                     <h2 style={styles.title}>Space Telemetry Log</h2>
+                </div>
+
+                <div style={styles.card}>
+                    <h3 style={{...styles.title, fontSize: "2rem", marginBottom: "1.5rem"}}>
+                        Available Commands
+                    </h3>
+                    <table style={styles.commandTable}>
+                        <thead>
+                            <tr style={styles.tableHeader}>
+                                <th style={styles.tableCell}>Command</th>
+                                <th style={styles.tableCell}>Description</th>
+                          
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {commandTable.map((cmd, index) => (
+                                <tr key={index}>
+                                    <td style={styles.tableCell}>{cmd.command}</td>
+                                    <td style={styles.tableCell}>{cmd.description}</td>
+                                   
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
 
                 <div style={styles.card}>

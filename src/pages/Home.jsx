@@ -132,37 +132,37 @@ const Home = () => {
           zIndex: 10,
         }}
       >
-        <p style={{ fontSize: '48px', margin: 0 }}>
+        <p style={{ fontSize: '60px', margin: 0 }}>
           Current Status
         </p>
         {latestVoltage !== null ? (
-          <p style={{ fontSize: '30px', marginTop: '20px' }}>
+          <p style={{ fontSize: '40px', marginTop: '20px' }}>
             Latest Voltage: {latestVoltage} V
           </p>
         ) : (
-          <p style={{ fontSize: '30px', marginTop: '20px' }}>
+          <p style={{ fontSize: '40px', marginTop: '20px' }}>
             Loading latest voltage...
           </p>
         )}
         {latestPower !== null ? (
-          <p style={{ fontSize: '30px', marginTop: '10px' }}>
+          <p style={{ fontSize: '40px', marginTop: '10px' }}>
             Latest Power: {latestPower} W
           </p>
         ) : (
-          <p style={{ fontSize: '30px', marginTop: '10px' }}>
+          <p style={{ fontSize: '40px', marginTop: '10px' }}>
             Loading latest power...
           </p>
         )}
                   {latestTelemetry !== null ? (
-            <p style={{ fontSize: '30px', marginTop: '10px' }}>
+            <p style={{ fontSize: '40px', marginTop: '10px' }}>
               Latest Telemetry: {latestTelemetry}
             </p>
           ) : (
-            <p style={{ fontSize: '30px', marginTop: '10px' }}>
+            <p style={{ fontSize: '40px', marginTop: '10px' }}>
               Loading latest telemetry...
             </p>
           )}
-        <p style={{ fontSize: '30px', marginTop: '10px' }}>
+        <p style={{ fontSize: '40px', marginTop: '10px' }}>
           Operational Status: <span style={{ fontWeight: 'bold' }}>Standby</span>
         </p>
       </div>

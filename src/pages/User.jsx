@@ -14,7 +14,8 @@ const User = ({ setAuthenticated, setUserType, setCallsign }) => {
             const response = await fetch("http://localhost:8888/authenticate-callsign", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ callsign: localCallsign })
+                body: JSON.stringify({ callsign: localCallsign }),
+                credentials: "include", //for cookies
             });
             const data = await response.json();
             if (!response.ok) {

@@ -96,7 +96,7 @@ const Cubes = ({ isRotating, setIsRotating, setCurrentStage, ...props }) => {
                 navigate("/solar"); // Navigate to the solar page
             }
 
-            if (clickedObject.name === "part16-1_-_Part" ||  clickedObject.name === "part16-2_-_Part") {
+            if (clickedObject.name === "Hole122_-_Part_2" ||  clickedObject.name === "Hole122_-_Part_3") {
                 navigate("/antenna"); // Navigate to the solar page
             }
 

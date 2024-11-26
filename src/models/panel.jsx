@@ -8,10 +8,6 @@ const Panel = () => {
   const solarRef = useRef();
   const {scene} = useGLTF(solarScene);
 
-    // const testRef = useRef(); 
-    // const {scene} = useGLTF(testScene);
-
-
   return  (
     <mesh  scale={[50, 50, 50 ]} ref={solarRef}>
     <primitive object={scene}/>
