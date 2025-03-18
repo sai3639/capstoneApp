@@ -1,6 +1,6 @@
 import React from "react";
 import { Html } from "@react-three/drei";
-
+//loader animation 
 const Loader = () => {
   return (
 

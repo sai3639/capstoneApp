@@ -1,416 +1,169 @@
-import { useGLTF, useAnimations, OrbitControls } from "@react-three/drei";
+import { useGLTF, useAnimations } from "@react-three/drei"; //useGLTF is a hook that loads GLTF 3d models
 import cubeScene from '../assets/3d/cubee.glb';
-import { useRef, useEffect, useState } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
-import { useAnimate, useMotionValue, useSpring } from "framer-motion";
-import { motion } from 'framer-motion-3d';
-import * as THREE from 'three';  // Import THREE.js
-import { useNavigate } from 'react-router-dom';  // Import useNavigate
+import { useRef, useEffect, useState } from "react"; //useREF - creates mutable references that persist between renders
+import { useThree } from "@react-three/fiber"; //provides access to three.js scene, camera, and renderer
+import * as THREE from 'three'; //core threejs library for 3d graphics
+import { useNavigate } from 'react-router-dom'; //navigate between pages
 
-
-
-const Cubes = ({ isRotating, setIsRotating, setCurrentStage, ...props }) => {
-    const cubeRef = useRef();
-    const navigate = useNavigate();
-
-    const { scene, animations } = useGLTF(cubeScene);
-
-    const {actions} = useAnimations(animations, cubeRef);
-    const [rotation, setRotation] = useState([0, 0, 0]);
-
-    // useFrame(() => {
-    //     cubeRef.current.rotation.y += 0.002; // rotation speed
-    // });
-
-   
-
-
-    const handleKeyDown = (e) => {
-        switch (e.key) {
-            case "ArrowLeft":
-                e.preventDefault();
-                setRotation((prev) => [prev[0], prev[1] - 0.1, prev[2]]); // Rotate left
-                break;
-            case "ArrowRight":
-                e.preventDefault();
-
-                setRotation((prev) => [prev[0], prev[1] + 0.1, prev[2]]); // Rotate right
-                break;
-            case "ArrowUp":
-                e.preventDefault();
-
-                setRotation((prev) => [prev[0] - 0.1, prev[1], prev[2]]); // Rotate up
-                break;
-            case "ArrowDown":
-                e.preventDefault();
-
-                setRotation((prev) => [prev[0] + 0.1, prev[1], prev[2]]); // Rotate down
-                break;
-            default:
-                break;
-        }
-    };
-
-    // const handleCubeClick = () => {
-    //     if (actions) {
-    //         const action = actions['Timeline'];  
-    //         if (action && !action.isRunning()) {
-    //             action.play();
-    //         }
-    //         // if (action) {
-    //         //     action.reset().play(); // Reset the animation and play it on click
-    //         // }
-    //     }
-    // };
-
-    const componentRefs = useRef({});
-
-    const animationPlayed = useRef(false);
-    const mouseX = useRef(0);
-    const mouseY = useRef(0);
-    const raycaster = useRef(new THREE.Raycaster());
-    const mouse = useRef(new THREE.Vector2());
-    const { camera } = useThree();
-
-
-
-    const handleMouseClick = (event) => {
-        mouse.current.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-        raycaster.current.setFromCamera(mouse.current, camera);
-
-        const intersects = raycaster.current.intersectObjects(scene.children, true);
-
-        if (intersects.length > 0) {
-            const clickedObject = intersects[0].object;
-            console.log(`Clicked on ${clickedObject.name}`); 
-            
+const Cubes = ({ ...props }) => { //...props - accept and spread additional props (like scale position, rotation)
+    const cubeRef = useRef(); //reference 3d cube obj
+    const navigate = useNavigate(); //chang epages when clicking specifici parts of cube
+    const { scene, animations } = useGLTF(cubeScene); //loads gltf model - gets 3d obj hiearchy and animation clips inside model
+    const { actions } = useAnimations(animations, cubeRef); //extracts animations from model
+  
+    const [isHovered, setIsHovered] = useState(false); //boolean state - tracks if cube is hovered
+    const [hoveredParts, setHoveredParts] = useState({}); //hoveredParts - tracks which cube parts are hovered
+    const animationPlayed = useRef(false); //tracs if animation has played
+  
+    const componentRefs = useRef({}); //stores references to cube parts
+  
+    const raycaster = useRef(new THREE.Raycaster()); //detects mouse clibs on 3d objects
+    const mouse = useRef(new THREE.Vector2()); //stores normalized mouse position
+    const { camera, gl } = useThree(); //extracts camera and WebGL renderer
+  
+    //converts mouse position to range between -1 and 1
+    //raycaster detects objects under mouse cursor
+    const handleMouseClick = (event) => { //triggered when user clicks on screen - event parameter represents mouse event that provides details like cursor position
+      //mouse.current - reference to three.js vector2 that stores mouse position
+      //devent.clientx and event.clientY = mouse cursor's pixel coordinates relative to window
+      mouse.current.x = (event.clientX / window.innerWidth) * 2 - 1; //normalize mouse posiiton from screen coordinates 0 to width/height to range of -1 to 1
+      mouse.current.y = -(event.clientY / window.innerHeight) * 2 + 1; //rayscasting needs this range
+      //event.clientx /window.innerWidth - scales x position between 0 and 1
+      //multiply by 2 and subtract by 1 shifts range form 0-1 to -1-1
+      raycaster.current.setFromCamera(mouse.current, camera); //used for detecting objects under mouse curosor 
+      //setFromCamera uses mouse.current (normalized posiion) and camera to cast a ray from camera through curosor position
+      const intersects = raycaster.current.intersectObjects(scene.children, true); //checks which 3d objects in scene.children ray intersects
+      //true = check child objects inside groups - intersects - array of objects that are hit
+  
+      //if raycaster detects click on 3d object
+      if (intersects.length > 0) {
+        const clickedObject = intersects[0].object; //gets clicked object
+        console.log(`Clicked on ${clickedObject.name}`); //logs name - debug
+        //$ - inserts javascripts expressions into string
+        setIsHovered(false); //disables hover effect 
+        //changes mouse cursosr back to default
+        gl.domElement.style.cursor = 'default'; //gl - WebGL renderer rendeinr 3d scene
+        //domElement - HTML canvas element where 3d scene is drawn
         
-            if (clickedObject.name === "part15-2_-_Part" || clickedObject.name === "part14-1_-_Part" || clickedObject.name === "part15-1_-_Part") {
-                navigate("/power"); // Navigate to the Power page
-            }
-            
-
-            if (clickedObject.name === "part11-1_-_Part_2") {
-                navigate("/solar"); // Navigate to the solar page
-            }
-
-            if (clickedObject.name === "Hole122_-_Part_2" ||  clickedObject.name === "Hole122_-_Part_3") {
-                navigate("/antenna"); // Navigate to the solar page
-            }
-
-
-            //part11-1_-_Part_2
-
-
-            //part16-2_-_Part
-
-            //part16-1_-_Part
+        //speciffic parts of model clicked - navigate to specific pages 
+        if (clickedObject.name === "part15-2_-_Part" || clickedObject.name === "part14-1_-_Part") {
+          navigate("/power"); //navigate to power page  - volts/batteries
         }
+        if (clickedObject.name === "part11-1_-_Part_2") {
+          navigate("/solar"); //navigate to solar page - power
+        }
+        if (clickedObject.name === "Hole122_-_Part_2") {
+          navigate("/antenna"); //navigate to antenna page - telemetry logs
+        }
+      }
+    };
+  
+    //if animation aailable - play timeline animation
+    const handleCubeClick = () => { //cube click events - function triggered when user clicks cube
+      if (actions) { //actions - object containing animation clips extracted from the cube model
+        const action = actions['Timeline']; //gets timeline animation 
+        if (action && !action.isRunning() && !animationPlayed.current) { //ensure animation exisits, prevents from playing if already running, ensures it hasnot been played before
+          action.setLoop(THREE.LoopOnce); //makes animation play once instead of looping
+          action.clampWhenFinished = true;//makes animation stay at final frame when end instead of resetting
+          action.play(); //play animation
+          animationPlayed.current = true; //prevents replay
+          
+          //when animation finished
+          action.onFinished = () => {
+            //componentRefs.current = object that stores references to various parts of the cube
+            //object.values - extracts all references from object
+            //loop through each reference - if not exist it makes component visiible
+            Object.values(componentRefs.current).forEach((ref) => { 
+              if (ref) ref.visible = true; //alll parts of cube visibible after animation finsihes
+            });
+          };
+        }
+      }
     };
 
-    // const handleCubeClick = () => {
-    //     if (actions) {
-    //         const action = actions['Timeline']; 
-    //         if (action && !action.isRunning()) {
-    //             action.setLoop(THREE.LoopOnce); // Play the animation only once
-    //             action.clampWhenFinished = true; // Keep the last frame after the animation ends
-    //             action.play();
-    //             animationPlayed.current = true;
-    //         }
-    //     }
-    // };
+    //adds click event listener when component mounts
+    useEffect(() => {
+      window.addEventListener('click', handleMouseClick); //attaches event listner to window object - llistens for click anywhere in browswer window
+      return () => {
+        window.removeEventListener('click', handleMouseClick); //removes when component unmounts 
+      };
+    }, []);
+  
 
-
-    const handleCubeClick = () => {
-        if (actions) {
-            const action = actions['Timeline'];  
-            if (action && !action.isRunning() && !animationPlayed.current) {
-                action.setLoop(THREE.LoopOnce);
-                action.clampWhenFinished = true;
-                action.play();
-                animationPlayed.current = true;
-
-                // components are interactive after animation
-                action.onFinished = () => {
-                    Object.values(componentRefs.current).forEach((ref) => {
-                        if (ref) ref.visible = true; 
+    //screen adjustmentsssss
+    const adjustCubeForScreenSize = () => {
+      let screenPosition = [-2, 3, -3];
+      let cubeScale = [10, 10, 10];
+      
+      //mobile screen
+      if (window.innerWidth < 768) {
+        cubeScale = [6, 6, 6];
+      }
+  
+      return [cubeScale, screenPosition];
+    };
+  
+    const [cubeScale, cubePosition] = adjustCubeForScreenSize();
+  
+    return (
+      //render the cube 
+      <mesh
+        ref={cubeRef}
+        onClick={handleCubeClick} //handlle click 
+        scale={isHovered ? [cubeScale[0] * 1.1, cubeScale[1] * 1.1, cubeScale[2] * 1.1] : cubeScale} //cube should increase by 10% when hovered
+        position={cubePosition}
+        //mouse events
+        onPointerOver={() => {
+          setIsHovered(true); //activates hover effects
+          gl.domElement.style.cursor = 'pointer'; //change curosor to pointer
+        }}
+        onPointerOut={() => {
+          setIsHovered(false);
+          gl.domElement.style.cursor = 'default'; //change cursor to default (not pointer)
+        }}
+        {...props} //spread operator - pass all received props into component
+      >
+        
+        <primitive object={scene}
+        //renders imported 3d model inside cube
+        > 
+          {scene.children.map((child) => { //loops throuhg model parts and makes them clickable
+            if (child.type === "Group") { //check if current cild is in group
+              return child.children.map((part) => ( //if child is a group - lloop through individual mesh parts
+                <mesh //represents 3d object
+                  key={part.name} //each part needs unique key and part.name is identifier
+                  ref={(el) => (componentRefs.current[part.name] = el)} //stores reference to mesh part 
+                  position={part.position} //sets position to match oriiginal placement inside 3d model
+                  rotation={part.rotation} //applies correct rotation to match orientation in model
+                  visible={false} //starts hidden 
+                  onPointerOver={() => { //triggers when mouse hovers over  part
+                    setHoveredParts(prev => ({...prev, [part.name]: true})); //updates hoveredParts states -- adds current part o list of hovered parts
+                    gl.domElement.style.cursor = 'pointer'; //changes curosr to pointer
+                  }}
+                  //removes part from hoveredParts state when mouse leaves
+                  //resets cursor to normal
+                  onPointerOut={() => {
+                    setHoveredParts(prev => {
+                      const newState = {...prev};
+                      delete newState[part.name];
+                      return newState;
                     });
-                    
-                };
+                    gl.domElement.style.cursor = 'default';
+                  }}
+                  scale={hoveredParts[part.name] ? [1.1, 1.1, 1.1] : [1, 1, 1]} //if part hovered it scales up by 10%
+                >
+                  <primitive object={part} 
+                  //render 3d obj
+                  /> 
+                </mesh>
+              ));
             }
-        }
-    };
-    // const handleComponentClick = (componentName) => {
-    //     console.log(`Clicked on ${componentName}`);
-    // };
-
-    // const handleMouseClick = (event) => {
-    //     mouse.current.x = (event.clientX / window.innerWidth) * 2 - 1;
-    //     mouse.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    //     raycaster.current.setFromCamera(mouse.current, camera);
-
-    //     const intersects = raycaster.current.intersectObjects(scene.children, true);
-
-    //     if (intersects.length > 0) {
-    //         const clickedObject = intersects[0].object;
-    //         console.log(`Clicked on ${clickedObject.name}`); // Log the name of the clicked component
-    //         //onclick component handler link 
-    //     }
-    // };
-
-    // useEffect(() => {
-    //     window.addEventListener('keydown', handleKeyDown);
-    //     return() =>{
-    //         window.removeEventListener('keydown', handleKeyDown)
-    //     }
-    // }, [])
-
-
-    useEffect(() => {
-        window.addEventListener('click', handleMouseClick);
-        return () => {
-            window.removeEventListener('click', handleMouseClick);
-        };
-    }, []);
-
-    useEffect(() => {
-        console.log(animations); // Log animations to the console
-    }, [animations]);
-
-    // useFrame(() => {
-    //     if (cubeRef.current){
-    //         cubeRef.current.rotation.set(rotation[0], rotation[1], rotation[2])
-    //     }
-    // })
-    
-
-    const options = { damping: 20 }
-
-    // const mouse = {
-    //     x: useSpring(useMotionValue(0), options),
-    //     y: useSpring(useMotionValue(0), options)
-    // }
-
-    // const manageMouseMove = (e) => {
-    //     const { innerWidth, innerHeight } = window;
-    //     const { clientX, clientY } = e;
-    //     const multiplier = 4;
-
-    //     const x = (clientX / innerWidth) * multiplier;
-    //     const y = (clientY / innerHeight) * multiplier;
-    //     mouse.x.set(x);
-    //     mouse.y.set(y);
-    // }
-    const manageMouseMove = (e) => {
-        // Update mouse position on mouse move
-        mouseX.current = e.clientX;
-        mouseY.current = e.clientY;
-    }
-
-    useEffect(() => {
-        window.addEventListener('mousemove', manageMouseMove);
-        return () => window.removeEventListener('mousemove', manageMouseMove);
-    }, []);
-
-    // useFrame(() => {
-    //     if (cubeRef.current) {
-    //         // rotation based on mouse position
-    //         const rotationSpeed = 0.003; 
-    //         const deltaX = mouseX.current - window.innerWidth / 2; // Difference from center
-    //         const deltaY = mouseY.current - window.innerHeight / 2;
-
-    //         // Rotate around Y axis based on mouse X position
-    //         cubeRef.current.rotation.y += deltaX * rotationSpeed;
-    //         // Rotate around X axis based on mouse Y position
-    //         cubeRef.current.rotation.x -= deltaY * rotationSpeed;
-
-    //         cubeRef.current.rotation.x = THREE.MathUtils.clamp(cubeRef.current.rotation.x, -Math.PI / 2, Math.PI / 2);
-    //     }
-    // });
-
-  
-    // Set limits for the rotation angles
-    const maxRotationX = Math.PI / 4;  // Limit for X-axis rotation (45 degrees)
-    const maxRotationY = Math.PI / 4;  // Limit for Y-axis rotation (45 degrees)
-
-    //            <OrbitControls enablePan={false} enableZoom={true} />
-
-//     return (
-//         <motion.primitive
-//            // rotation-x={mouse.y} // Limit X-axis rotation
-//             //rotation-y={mouse.x} // Limit Y-axis rotation
-//             ref={cubeRef}
-//             object={scene}
-//             onClick={handleCubeClick}
-//             //position={[2, 0, -2]}  // Ensure the cube is centered
-//             {...props}
-//         />
-//     );
-// };
-
-
-//rotation={rotation}
-
-return (
-    <mesh ref={cubeRef} onClick={handleCubeClick} {...props} >
-        <primitive object={scene}>
-            {scene.children.map((child) => {
-                if (child.type === "Group") {
-                    return child.children.map((part) => (
-                        <mesh
-                            key={part.name}
-                            ref={(el) => (componentRefs.current[part.name] = el)} 
-                            position={part.position} 
-                            rotation={part.rotation} 
-                            visible={false} 
-                        >
-                            <primitive object={part} />
-                        </mesh>
-                    ));
-                }
-                return null; 
-            })}
+            return null;
+          })}
         </primitive>
-    </mesh>
-);
-};
-
-
-
-// return (
-//     <mesh ref={cubeRef} onClick={handleCubeClick} {...props}>
-//         <primitive object={scene}>
-//             {scene.children.map((child) => {
-//                 if (child.type === "Group") {
-//                     return child.children.map((part) => (
-//                         <mesh
-//                             key={part.name}
-//                             ref={(el) => (componentRefs.current[part.name] = el)} 
-//                             position={part.position} 
-//                             rotation={part.rotation} 
-//                             onClick={(e) => {
-//                                 e.stopPropagation(); 
-//                                 handleComponentClick(part.name); 
-//                             }} 
-//                             visible={false} 
-//                         >
-//                             <primitive object={part} />
-//                         </mesh>
-//                     ));
-//                 }
-//                 return null; 
-//             })}
-//         </primitive>
-//     </mesh>
-// );
-// };
-
-export default Cubes;
-
-
-
-
-  //   const handlePointerDown = (e) => {
-//     e.stopPropagation();
-//     e.preventDefault();
-//     setIsRotating(true);
-
-//     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-
-//     lastX.current = clientX;
-//   };
-
-//   const handlePointerUp = (e) => {
-//     e.stopPropagation();
-//     e.preventDefault();
-//     setIsRotating(false);
-//   };
-
-//   const handlePointerMove = (e) => {
-//     e.stopPropagation();
-//     e.preventDefault();
-
-//     if (isRotating) {
-//       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-//       const delta = (clientX - lastX.current) / viewport.width;
-//       cubeRef.current.rotation.y += delta * 0.01 * Math.PI; 
-//     //   if (cubeRef.current) {
-//     //     cubeRef.current.rotation.y += delta * 0.01 * Math.PI;
-//     //   }
-
-//       lastX.current = clientX;
-//       rotationSpeed.current = delta * 0.01 * Math.PI;
-//     }
-//   };
-
+      </mesh>
+    );
+  };
   
-//   const handleKeyDown = (e) => {
-//     if(e.key === "ArrowLeft"){
-//         if(!isRotating) setIsRotating(true);
-//         cubeRef.current.rotation.y += 0.01 * Math.PI;
-//         rotationSpeed.current = 0.0125;
-
-//     } else if (e.key === "ArrowRight"){
-//         if(!isRotating) setIsRotating(true);
-//         cubeRef.current.rotation.y -= 0.01 * Math.PI;
-//         rotationSpeed.current = -0.0125;
-
-//     }
-//   }
-
-//   const handleKeyUp = (e) => {
-//     if (e.key === 'ArrowLeft' || e.key === "ArrowRight") {
-//       setIsRotating(false);
-//     }
-//   };
-
-//   useFrame(() => {
-//     if (!isRotating) {
-//       rotationSpeed.current *= dampingFactor;
-//       if (Math.abs(rotationSpeed.current) < 0.001) {
-//         rotationSpeed.current = 0;
-//       }
-//       cubeRef.current.rotation.y += rotationSpeed.current;
-//     } else {
-//       const rotation = cubeRef.current?.rotation.y || 0;
-//       const normalizedRotation = ((rotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-
-//       // Set the current stage based on the orientation
-//       switch (true) {
-//         case normalizedRotation >= 5.45 && normalizedRotation <= 5.85:
-//           setCurrentStage(4);
-//           break;
-//         case normalizedRotation >= 0.85 && normalizedRotation <= 1.3:
-//           setCurrentStage(3);
-//           break;
-//         case normalizedRotation >= 2.4 && normalizedRotation <= 2.6:
-//           setCurrentStage(2);
-//           break;
-//         case normalizedRotation >= 4.25 && normalizedRotation <= 4.75:
-//           setCurrentStage(1);
-//           break;
-//         default:
-//           setCurrentStage(null);
-//       }
-//     }
-//   });
-
-//   useEffect(() => {
-//     const canvas = gl.domElement;
-//     // canvas.addEventListener('pointerdown', handlePointerDown);
-//     // canvas.addEventListener('pointerup', handlePointerUp);
-//     // canvas.addEventListener('pointermove', handlePointerMove);
-//     document.addEventListener('keyup', handleKeyUp);
-//     document.addEventListener('keydown', handleKeyDown);
-
-//     return () => {
-//     //   canvas.removeEventListener('pointerdown', handlePointerDown);
-//     //   canvas.removeEventListener('pointerup', handlePointerUp);
-//     //   canvas.removeEventListener('pointermove', handlePointerMove);
-//       document.removeEventListener('keyup', handleKeyUp);
-//       document.removeEventListener('keydown', handleKeyDown);
-//     };
-//   }, [gl]);
+export default Cubes;
+ 

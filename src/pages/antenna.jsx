@@ -1,323 +1,340 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Navigation from "./navigation"; //navigation bar component
 
-const styles = {
-    container: {
-        minHeight: "100vh",
-        background: "linear-gradient(to bottom, #0f172a, #1e3a8a, #0f172a)",
-        color: "#e2e8f0",
-        padding: "4rem",
-        fontFamily: "system-ui, -apple-system, sans-serif",
-    },
-    contentWrapper: {
-        maxWidth: "1400px",
-        margin: "0 auto",
-    },
-    header: {
-        display: "flex",
-        alignItems: "center",
-        gap: "2rem",
-        marginBottom: "4rem",
-    },
-    title: {
-        fontSize: "4rem",
-        fontWeight: "bold",
-        background: "linear-gradient(to right, #60a5fa, #a78bfa)",
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        margin: 0,
-    },
-    card: {
-        background: "rgba(17, 24, 39, 0.7)",
-        backdropFilter: "blur(10px)",
-        borderRadius: "1rem",
-        border: "1px solid rgba(55, 65, 81, 0.5)",
-        padding: "3rem",
-        marginBottom: "3rem",
-    },
-    select: {
-        background: "#1f2937",
-        color: "#e2e8f0",
-        padding: "1rem 1.5rem",
-        borderRadius: "0.5rem",
-        border: "1px solid rgba(75, 85, 99, 0.5)",
-        marginLeft: "1rem",
-        fontSize: "1.5rem",
-        cursor: "pointer",
-    },
-    textarea: {
-        width: "100%",
-        background: "#1f2937",
-        color: "#e2e8f0",
-        padding: "1.5rem",
-        borderRadius: "0.5rem",
-        border: "1px solid rgba(75, 85, 99, 0.5)",
-        marginBottom: "1.5rem",
-        fontSize: "1.25rem",
-        resize: "vertical",
-        minHeight: "200px",
-    },
-    button: {
-        background: "#3b82f6",
-        color: "white",
-        padding: "1.5rem 3rem",
-        borderRadius: "0.5rem",
-        border: "none",
-        fontSize: "1.5rem",
-        cursor: "pointer",
-        transition: "all 0.2s ease",
-    },
-    commandTable: {
-        width: "100%",
-        borderCollapse: "collapse",
-        marginTop: "3rem",
-        fontSize: "1.25rem",
-    },
-    tableHeader: {
-        background: "rgba(17, 24, 39, 0.7)",
-        color: "#60a5fa",
-        fontWeight: "bold",
-    },
-    tableCell: {
-        border: "1px solid rgba(75, 85, 99, 0.5)",
-        padding: "1.5rem",
-        textAlign: "left",
-    },
-    logsGrid: {
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-        gap: "2em",
-        margin: "3rem 0",
-    },
-    logCard: {
-        background: "rgba(17, 24, 39, 0.7)",
-        backdropFilter: "blur(10px)",
-        borderRadius: "1rem",
-        border: "1px solid rgba(55, 65, 81, 0.5)",
-        padding: "2rem",
-        transition: "all 0.3s ease",
-        position: "relative",
-        overflow: "hidden",
-    },
-    logHeader: {
-        display: "flex",
-        alignItems: "center",
-        gap: "0.5rem",
-        marginBottom: "1rem",
-    },
-    callsign: {
-        color: "#60a5fa",
-        fontWeight: "bold",
-        fontSize: "1.5rem",
-    },
-    logContent: {
-        color: "#d1d5db",
-        marginBottom: "1.5rem",
-        lineHeight: "1.5",
-    },
-    timestamp: {
-        display: "flex",
-        alignItems: "center",
-        gap: "0.5rem",
-        color: "#9ca3af",
-        fontSize: "1rem",
-    },
-    icon: {
-        color: "#60a5fa",
-    },
-    noLogs: {
-        textAlign: "center",
-        padding: "2rem",
-        color: "#9ca3af",
-        gridColumn: "1 / -1",
-    },
-};
 
-// Add hover effects
-const hoverStyles = {
-    button: {
-        ...styles.button,
-        ":hover": {
-            background: "#2563eb",
-            transform: "translateY(-2px)",
-        },
-    },
-    logCard: {
-        ...styles.logCard,
-        ":hover": {
-            borderColor: "#60a5fa",
-            transform: "translateY(-2px)",
-        },
-    },
-};
+//users can sumbit new logs
+//manage user authentication/session verification
+//table of availabel commands
+//can navigate to telemetry data page
+
+//styles
+const styles = `
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #18181b;
+    color: white;
+  }
+
+  .container {
+    min-height: 100vh;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .header {
+    font-size: 24px;
+    margin-bottom: 20px;
+    padding-top: 60px;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+
+  .table th,
+  .table td {
+    padding: 10px;
+    border: 1px solid #3f3f46;
+    text-align: left;
+  }
+
+  .button {
+    background-color: #27272a;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    color: white;
+    cursor: pointer;
+    margin-bottom: 20px;
+  }
+
+  .select {
+    width: 100%;
+    background-color: #27272a;
+    color: white;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #3f3f46;
+    margin-bottom: 16px;
+  }
+
+  .textarea {
+    width: 100%;
+    background-color: #27272a;
+    color: white;
+    padding: 16px;
+    border-radius: 4px;
+    border: 1px solid #3f3f46;
+    margin-bottom: 16px;
+    min-height: 150px;
+    resize: vertical;
+  }
+
+  .logs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+  }
+
+  .log-card {
+    background-color: #27272a;
+    padding: 16px;
+    border-radius: 4px;
+  }
+
+  .log-title {
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+
+  .log-date {
+    font-size: 14px;
+    color: #a1a1aa;
+    margin-top: 8px;
+  }
+
+  .empty-logs {
+    text-align: center;
+    color: #71717a;
+    padding: 16px;
+  }
+`;
 
 const Antenna = ({ userType, callsign }) => {
-    const [telemetryData, setTelemetryData] = useState("");
-    const [logs, setLogs] = useState([]);
-    const [selectedCallsign, setSelectedCallsign] = useState(callsign || "");
-    const [filteredLogs, setFilteredLogs] = useState([]);
-    const [activeCommand, setActiveCommand] = useState(null);
-    const [sessionStatus, setSessionStatus] = useState(null);
-  
+    const [telemetryData, setTelemetryData] = useState(""); //store telemetry data inputted from user
+    const [logs, setLogs] = useState([]); //store telemetry logs
+    const [selectedCallsign, setSelectedCallsign] = useState(callsign || ""); //store current selected callsgin
+    const [filteredLogs, setFilteredLogs] = useState([]); //store logs filtered by the callsign
+    const [sessionStatus, setSessionStatus] = useState(null); //track if session is valid, invalid, or an error occurred
+    const navigate = useNavigate(); //navigate to differenet pages
+
+    //defining available commands
     const commandTable = [
-      { command: "Deploy Antenna", description: "Unfold antennas on CubeSat" },
-      { command: "Ping CubeSat", description: "Send diagnostic ping to verify CubeSat communication status" }
+        { command: "Deploy Antenna", description: "Unfold antennas on CubeSat" },
+        { command: "Get voltage", description: "Ask CubeSat for voltage reading" }
     ];
-  
-    const fetchLogs = async () => {
-      try {
-        const response = await fetch("http://localhost:8888/logs", { 
-          credentials: "include" // for sending cookies 
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        setLogs(data);
-        
-        if (selectedCallsign) {
-          const filtered = data.filter(log => log.callsign === selectedCallsign);
-          setFilteredLogs(filtered);
-        } else {
-          setFilteredLogs(data);
-        }
-      } catch (error) {
-        console.error("Error fetching logs:", error);
-        alert(`Failed to fetch logs: ${error.message}`);
-      }
-    };
-  
-    const verifySession = async () => {
-      try {
-        const response = await fetch("http://localhost:8888/verify-session", {
-          method: 'GET',
-          credentials: "include" // for sending cookies
-        });
-        
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-  
-        const data = await response.json();
-        
-        if (data.success) {
-          setSelectedCallsign(data.callsign);
-          setSessionStatus("valid");
-          console.log("Session is valid for callsign:", data.callsign);
-          fetchLogs(); // Automatically fetch logs after successful session verification
-        } else {
-          setSessionStatus("invalid");
-          console.log("Session invalid. Please log in again.");
-          // redirect to login page or show login modal
-          navigate('/login');
 
+    const fetchLogs = async () => { //get log
+        try {
+            console.log("Fetching logs..."); //indicates that logs are eing fetched
+            const response = await fetch("http://localhost:8888/logs", { //GEt request to get log
+                credentials: "include" //ensure cookies are sent with request
+            });
+
+            //if error - throw error with HTTP status
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`); //if request fails - error
+            }
+
+            //parses json response 
+            const data = await response.json();
+          //  console.log("Fetched logs:", data);
+            setLogs(data); //update logs state with data received
+
+            //filters log based on selected callsign
+            const filtered = selectedCallsign 
+            //check if selecedCallsign eists - if true filter logs where log.callsign === selectedCallsign
+            //if faslse - uses all logs
+            //.filter() creates new array contaitning the logs that meet the condition
+            //loop through each log and keep logs where theres a match
+            ? data.filter(log => log.callsign === selectedCallsign) //ternary/conditional operator
+            : data;
+        
+       // console.log("Filtered logs:", filtered); // Debug log
+        setFilteredLogs(filtered); //update filteredLogs state w relevant logs
+        } catch (error) {  //catch errorssss
+            console.error("Error fetching logs:", error);
+            alert(`Failed to fetch logs: ${error.message}`);
         }
-      } catch (error) {
-        console.error("Error verifying session:", error);
-        setSessionStatus("error");
-        alert(`Session verification failed: ${error.message}`);
-      }
     };
-  
+
+
+    useEffect(() => { //runs fetchlogs when component mounts
+        
+        fetchLogs();
+        
+    }, [sessionStatus]); //reruns whenever the sessioniStatus changes
+
+    // Update filtered logs when selectedCallsign changes
+    useEffect(() => { //if selected callsign changes then logs are refiltered
+        if (logs.length > 0) { //run if logs exist
+            const filtered = selectedCallsign // if selectedCallsign exists - filter logs
+            //else use all logs
+            //condition ? value_if_true : value_if_false
+            //creates new filtered array and loo[s through each log to check for match]
+                ? logs.filter(log => log.callsign === selectedCallsign)
+                : logs;
+            setFilteredLogs(filtered); //store in filtered logs
+        } //runs if user selects different callsign 
+    }, [selectedCallsign, logs]); ///new logs fetched from API
+
+    //verify user session
     useEffect(() => {
-      verifySession();
+        const checkSession = async () => { 
+            try {
+                const response = await fetch("http://localhost:8888/verify-session", { //send request to check user session
+                    method: 'GET',
+                    credentials: "include" //cookies included w request
+                });
+
+                //check if response successful
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`); //error getting request
+                }
+
+                //parses json response from server and store in data variable
+                const data = await response.json();
+                //if session valid - store callsign and sessionstatus = valid
+                if (data.success) {
+                    setSelectedCallsign(data.callsign); //set selectedcallsign to callsign receied from server
+                    setSessionStatus("valid"); //sessionstatus = valid
+                    console.log("Session is valid for callsign:", data.callsign); //log in console for debug
+                } else { //if invalid - then sessionstatus = invalid
+                    setSessionStatus("invalid"); //session = invalid
+                    console.log("No active session"); //log in console
+                }
+            } catch (error) { //error verifying session
+                console.error("Error verifying session:", error);
+                setSessionStatus("error");
+            }
+        };
+
+        checkSession(); //call checkSession function to initiate session verification when componenet mounts
     }, []);
-  
-    const handleLogSubmit = async () => {
-      if (userType === "guest" || sessionStatus !== "valid") {
-        alert("Unable to add log. Please check your session and user type.");
-        return;
-      }
-  
-      try {
-        const response = await fetch("http://localhost:8888/add-log", {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ 
-            callsign: selectedCallsign, 
-            telemetry_data: telemetryData 
-          })
-        });
-  
-        const data = await response.json();
-        
-        if (response.ok && data.success) {
-          alert(data.message);
-          setTelemetryData("");
-          fetchLogs(); // Refresh logs after successful submission
-        } else {
-          alert(data.message || "Failed to add log");
-        }
-      } catch (error) {
-        console.error("Error submitting log:", error);
-        alert(`Error submitting log: ${error.message}`);
-      }
+
+    //navigate to telemetry page when button clicked
+    const handleNavigateToTelemetry = () => {
+        navigate("/telemetry");
     };
 
+    //log session
+    const handleLogSubmit = async () => { //handle process of submitting log
+        //if guest (no radio license) - cant add new log
+        if (userType === "guest" || sessionStatus !== "valid") { //if user is guest
+            alert("Unable to add log. Please check your session and user type."); //display alert
+            return; //return
+        }
+
+        try {
+            //send POSt request w telemetry daata if new log made
+            const response = await fetch("http://localhost:8888/add-log", {
+                method: "POST", //POST request 
+                credentials: "include", //cookies sent with request
+                headers: {
+                    "Content-Type": "application/json" ///request body is in JSON format
+                },
+                body: JSON.stringify({ //conoverts data to JSON format to sned in request body
+                    callsign: selectedCallsign, //callsign of user submitting log
+                    telemetry_data: telemetryData //telemetry data enetered by user
+                })
+            });
+
+            const data = await response.json(); //parses JSON response from server and store in data variable
+            //if success - clear input and refresh the logs to show new ones
+            if (response.ok && data.success) { //check if response successfil and server indicates success
+                alert(data.message); //display alert - success
+                setTelemetryData(""); //clear data input
+                fetchLogs(); //refresh to update list of logs
+            } else { //else error
+                alert(data.message || "Failed to add log");
+            }
+        } catch (error) { //catch errors
+            console.error("Error submitting log:", error);
+            alert(`Error submitting log: ${error.message}`);
+        }
+    };
+
+    //extract array of callsign from logs (logs.map((log) => log.callsing))
+    //new Set() - convert array into set (removes duplicates)
+    //...new = converts set back to array
+    //store array into variable uniqueCallsigns
     const uniqueCallsigns = [...new Set(logs.map((log) => log.callsign))];
 
     return (
-        <div style={styles.container}>
-            <div style={styles.contentWrapper}>
-                <div style={styles.header}>
-                    <h2 style={styles.title}>Space Telemetry Log</h2>
-                </div>
+        <>
+            <style>{styles}</style>
+            <div className="container">
+                <Navigation 
+                //render navigation bar
+                />
+                
+                <h2 className="header">Space Telemetry Log</h2>
 
-                <div style={styles.card}>
-                    <h3 style={{...styles.title, fontSize: "2rem", marginBottom: "1.5rem"}}>
-                        Available Commands
-                    </h3>
-                    <table style={styles.commandTable}>
+               
+
+
+                <div
+                //commands table 
+                >
+                    <h3 className="header">Available Commands</h3>
+                    <table className="table">
                         <thead>
-                            <tr style={styles.tableHeader}>
-                                <th style={styles.tableCell}>Command</th>
-                                <th style={styles.tableCell}>Description</th>
-                          
+                            <tr
+                            //table row
+                            >
+                                <th>Command</th>
+                                <th>Description</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {commandTable.map((cmd, index) => (
+                            {commandTable.map((cmd, index) => ( //loops through each command object in commandTable
+                            //for each cmd, creates new table row
+                            //key - identifyes each row uniquely
                                 <tr key={index}>
-                                    <td style={styles.tableCell}>{cmd.command}</td>
-                                    <td style={styles.tableCell}>{cmd.description}</td>
-                                   
+                                    <td
+                                    //display command in first column
+                                    >
+                                        {cmd.command}</td>
+                                    <td
+                                    //display description of the commad in 2nd column
+                                    >
+                                        {cmd.description}</td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
 
-                <div style={styles.card}>
-                    <div style={styles.logHeader}>
-                        <select
-                            value={selectedCallsign}
-                            onChange={(e) => setSelectedCallsign(e.target.value)}
-                            style={styles.select}
-                        >
-                            {uniqueCallsigns.map((call, index) => (
-                                <option key={index} value={call}>
-                                    {call}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                <button
+                    onClick={handleNavigateToTelemetry} //executes handleNavigateToTelemetry function
+                    className="button"
+                >
+                    View Telemetry Data
+                </button>
 
-                    {userType === "authenticated" && (
+                <div>
+                    <select //dropdown select element
+                        value={selectedCallsign} //value of dropdown to selectedCallsign stae
+                        //updates selected call sign when new option is selected from dropdown
+                        onChange={(e) => setSelectedCallsign(e.target.value)} 
+                        className="select"
+                    >
+                        
+                        {uniqueCallsigns.map((call, index) => (//loop over uniqueCallsigns array and redners option for eac
+                        //unique key for each option
+                        //value=call - set value of dropdown option to curent callsign
+                        //call - displays callsign as option text
+                            <option key={index} value={call}>{call}</option>
+                        ))}
+                    </select>
+
+                    {userType === "authenticated" && (// text area and subit utton are shown only for validated users
                         <div>
                             <textarea
-                                style={styles.textarea}
+                                className="textarea" //multi line text input
                                 placeholder="Enter telemetry data..."
-                                value={telemetryData}
-                                onChange={(e) => setTelemetryData(e.target.value)}
+                                value={telemetryData} 
+                                onChange={(e) => setTelemetryData(e.target.value)} //updates telemetryData state when user types in text area
                             />
                             <button
-                                onClick={handleLogSubmit}
-                                style={hoverStyles.button}
+                                onClick={handleLogSubmit} //function to handle submit of telemetry data
+                                className="button"
                             >
                                 Submit Log
                             </button>
@@ -325,31 +342,36 @@ const Antenna = ({ userType, callsign }) => {
                     )}
                 </div>
 
-                <h3 style={{ ...styles.title, fontSize: "1.5rem" }}>
-                    Transmission Logs: {selectedCallsign}
-                </h3>
+                <h3 className="header">Transmission Logs: {selectedCallsign}</h3>
 
-                <div style={styles.logsGrid}>
-                    {filteredLogs.length > 0 ? (
-                        filteredLogs.map((log, index) => (
-                            <div key={index} style={hoverStyles.logCard}>
-                                <div style={styles.logHeader}>
-                                    <span style={styles.callsign}>{log.callsign}</span>
-                                </div>
-                                <p style={styles.logContent}>{log.telemetry_data}</p>
-                                <div style={styles.timestamp}>
-                                    <span>{new Date(log.created_at).toLocaleString()}</span>
+                <div className="logs-grid"
+                //render transmission logs
+                > 
+                
+                    {filteredLogs.length > 0 ? ( //if there are logs to display then logs are mapped into individual log cards
+                        filteredLogs.map((log, index) => ( //.map loops over filtered logs array and renders a card for each log
+                            //unique key for each log card
+                            <div key={index} className="log-card">
+                                <div className="log-title">{log.callsign}</div> 
+                                <p
+                                //displays telemetry data of log
+                                >{log.telemetry_data}</p>
+                                <div className="log-date"
+                                //displays formatted creation date of log
+                                >
+                                    {new Date(log.created_at).toLocaleString()} 
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <div style={styles.noLogs}>
+                         //if none available - displays no transmission logs available
+                        <div className="empty-logs"> 
                             No transmission logs available
                         </div>
                     )}
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 

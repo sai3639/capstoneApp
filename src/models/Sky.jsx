@@ -11,7 +11,7 @@ const Sky = () => {
         skyRef.current.rotation.y += 0.002; // rotation speed
     });
 
-    const { scene } = useGLTF(skyScene);
+    const { scene } = useGLTF(skyScene);//load
 
     return (
         <mesh ref={skyRef}>
