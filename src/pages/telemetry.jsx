@@ -153,10 +153,10 @@ const TelemetryData = ({ setAuthenticated, setUserType, setCallsign, authenticat
                             placeholderText="Select end date"
                         />
                     </div>
-                    <button  onClick={fetchTelemetry} className="button">
+                    <button style={{ marginTop: '1.5rem' }}  onClick={fetchTelemetry} className="button">
                         Filter
                     </button>
-                    <button onClick={() => { setStartDate(null); setEndDate(null); fetchTelemetry(); }} className="button">
+                    <button  style={{ marginTop: '1.5rem' }} onClick={() => { setStartDate(null); setEndDate(null); fetchTelemetry(); }} className="button">
                         Clear
                     </button>
                 </div>
