@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';  //hook from React Router to navigate bewtween fiferrent routes 
 //navigatio component to provide buttons to go to different pages
-const Navigation = () => {
+const Navigation = ({ setAuthenticated, setUserType, setCallsign, isAuthenticated, userType }) => {
     const navigate = useNavigate();
 
     const styles = {
@@ -21,6 +21,24 @@ const Navigation = () => {
             backgroundColor: '#444444'
         }
     };
+
+    const handleLogout = async () => {
+        try {
+            await fetch("http://localhost:8888/api/logout", {
+                method: "POST",
+                credentials: "include"
+            });
+
+            setAuthenticated(false);
+            setUserType(null);
+            setCallsign(null);
+
+            navigate("/"); // go back to login page
+        } catch (err) {
+            console.error("Logout error:", err);
+        }
+    };
+
 
     return (
         <nav>
@@ -60,14 +78,11 @@ const Navigation = () => {
                 Telemetry
             </button>
 
-
-            <button 
-                style={styles.navButton} 
-                className="nav-button" 
-                onClick={() => navigate('/')} //navigate to login page
-            >
-                Login
-            </button>
+            {!isAuthenticated || userType == "guest" ? (
+                <button style={styles.navButton} onClick={() => navigate('/')}>Login</button>
+            ) : (
+                <button style={styles.navButton} onClick={handleLogout}>Logout</button>
+            )}
         </nav>
     );
 };

@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import {Route, BrowserRouter as Router, Routes} from 'react-router-dom'; //handles routing 
 //routes - define group of routes
 //route - defines path and component that should be rendered when path is accessed
-import {Home, Power, Solar, User, Antenna, TelemetryData} from './pages';
+import {Home, Power, Solar, User, Antenna, Telemetry} from './pages';
 
 
 
@@ -23,10 +23,34 @@ const App = () => {
             >
                 <Route path="/" element={<User setAuthenticated={setAuthenticated} setUserType={setUserType} setCallsign={setCallsign}/>} />
                 <Route path="/Home" element={<Home authenticated={authenticated}/>} />
-                <Route path="/power" element={<Power />} />
-                <Route path="/solar" element={<Solar />} />
-                <Route path="/antenna" element={<Antenna userType={userType} callsign={callsign} />} />
-                <Route path="/telemetry" element={<TelemetryData />}/>
+                <Route path="/power" element={<Power 
+                authenticated={authenticated}
+                setAuthenticated={setAuthenticated}
+                userType={userType}
+                setUserType={setUserType}
+                callsign={callsign}
+                setCallsign={setCallsign}
+                />} />
+                <Route path="/solar" element={<Solar 
+                authenticated={authenticated}
+                setAuthenticated={setAuthenticated}
+                userType={userType}
+                setUserType={setUserType}
+                callsign={callsign}
+                setCallsign={setCallsign}
+                />} />
+                <Route path="/antenna" element={<Antenna  authenticated={authenticated}
+                  setAuthenticated={setAuthenticated}
+                  userType={userType}
+                  setUserType={setUserType}
+                  callsign={callsign}
+                  setCallsign={setCallsign}/>} />
+                <Route path="/telemetry" element={<Telemetry authenticated={authenticated}
+                  setAuthenticated={setAuthenticated}
+                  userType={userType}
+                  setUserType={setUserType}
+                  callsign={callsign}
+                  setCallsign={setCallsign} />}/>
 
             </Routes>
         </Router>

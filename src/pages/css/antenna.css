@@ -1,0 +1,95 @@
+
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #18181b;
+    color: white;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .header {
+    font-size: 24px;
+    margin-bottom: 20px;
+    padding-top: 60px;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+
+  .table th,
+  .table td {
+    padding: 10px;
+    border: 1px solid #3f3f46;
+    text-align: left;
+  }
+
+  .button {
+    background-color: #27272a;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    color: white;
+    cursor: pointer;
+    margin-bottom: 20px;
+  }
+
+  .select {
+    width: 100%;
+    background-color: #27272a;
+    color: white;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #3f3f46;
+    margin-bottom: 16px;
+  }
+
+  .textarea {
+    width: 100%;
+    background-color: #27272a;
+    color: white;
+    padding: 16px;
+    border-radius: 4px;
+    border: 1px solid #3f3f46;
+    margin-bottom: 16px;
+    min-height: 150px;
+    resize: vertical;
+  }
+
+  .logs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+  }
+
+  .log-card {
+    background-color: #27272a;
+    padding: 16px;
+    border-radius: 4px;
+  }
+
+  .log-title {
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+
+  .log-date {
+    font-size: 14px;
+    color: #a1a1aa;
+    margin-top: 8px;
+  }
+
+  .empty-logs {
+    text-align: center;
+    color: #71717a;
+    padding: 16px;
+  }

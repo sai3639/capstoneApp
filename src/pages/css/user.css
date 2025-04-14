@@ -1,0 +1,79 @@
+
+
+.contain {
+    min-height: 100vh;
+    background-color: #1e1e1e ; /*Dark grey background*/
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem
+}
+
+    .loginBox {
+        background-color: #2a2a2a; 
+        padding: 3rem; 
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px; 
+        border: 1px solid #3a3a3a
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 2rem
+    }
+
+    .title {
+        color: white;
+        font-size: 2rem;  
+        font-weight: bold;
+        margin-bottom: 0.5rem
+    }
+    .subtitle {
+        color: #cccccc /* Light grey*/
+    }
+    .input {
+        width: 100%;
+        padding: 0.75rem;  
+        margin-bottom: 1.5rem;  
+        background-color: #333333; 
+        border: 1px solid #444444;
+        border-radius: 4px;
+        color: white;
+        font-size: 1rem  
+    }
+    .buttonContainer {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem  
+    }
+    .authenticateButton {
+        padding: 0.75rem; 
+        background-color: #444444; 
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;  
+        cursor: pointer;
+        transition: background-color 0.2s;
+        font-weight: bold
+    }
+    .guestButton {
+        padding: 0.75rem;  
+        background-color: transparent;
+        color: white;
+        border: 1px solid #444444;
+        border-radius: 4px;
+        font-size: 1rem;  
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .error {
+        color: #ff4d4d;
+        background-color: rgba(255, 77, 77, 0.1);
+        padding: 0.75rem;
+        border-radius: 4px;
+        text-align: center;
+        margin-top: 1rem
+    }

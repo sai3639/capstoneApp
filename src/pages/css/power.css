@@ -1,0 +1,211 @@
+
+    body {
+        background-color: #121212; /* dark background*/
+        color: #e0e0e0; /* light grey teext */
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 
+                    'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 
+                    'Helvetica Neue', sans-serif; /*fonts*/
+        margin: 0; /*remove default spacing*/
+        padding: 0; /*remove defaalt spacing */
+        
+    } 
+
+    .power-container {
+        display: flex; 
+        flex-direction: column; /*stack elements vertically*/
+        height: 100vh; /*fill entire screen heiht*/
+        background-color: #121212; /*dark background*/
+    }
+
+    .main-content {
+        display: flex; /*horizontal layout*/
+        gap: 16px; /*add spacing between components*/
+        padding: 16px; /*add internal spacing*/
+        height: calc(100vh - 70px); /* account for top bar - exclude */
+    }
+
+    .left-section {
+        flex: 1.6; /*takes more space*/
+        display: flex;
+        flex-direction: column; /*vertical layout*/
+        gap: 16px;
+    }
+
+    .right-section {
+        flex: 0.8;
+        display: flex;
+    }
+
+    .chart-section {
+        flex: 1; /*take equal space in container*/
+        background-color: #1a1a1a; /*dark background*/
+        border-radius: 8px; /*round corners*/
+        padding: 16px; /*spacing inside cointainer*/
+        height: 45%; /*limit height to 45% of its parent*/
+    }
+
+    .chart-container {
+        height: calc(100% - 30px); /*reverses 30px for title*/
+        width: 100%; /*full width*/
+    }
+
+    .battery-section {
+        flex: 1; /*equal space*/
+        height: 45%; /*consisten height*/
+        background-color: #1a1a1a;
+        border-radius: 8px;
+        overflow: hidden; /*prevents scrolling issues*/
+    }
+
+    .battery-canvas {
+        width: 100% !important; /*forces full width and height*/
+        height: 100% !important; /*!important overrides other styles*/
+    }
+
+    .table-container {
+    /*voltage table*/
+        flex: 1;
+        background-color: #1a1a1a;
+        border-radius: 8px;
+        padding: 16px;
+        overflow: auto;
+    }
+
+    .voltage-table {
+    /*voltage table styling*/
+        width: 100%;
+        border-collapse: collapse; /*removes space between table borders*/
+        background-color: #1a1a1a;
+        font-size: 0.9rem; 
+    }
+
+    /*defines spacing and alignment for cells*/
+    .voltage-table th,
+    .voltage-table td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #333;
+    }
+
+    .voltage-table th {
+        background-color: #252525;
+        color: #00ffff;
+        font-weight: 600;
+        position: sticky; /*makes header stick to top when scrolling*/
+        top: 0;
+    }
+
+    /*highlights rows when hovered*/
+    .voltage-table tr:hover {
+        background-color: #252525;
+    }
+
+    .top-bar {
+        display: flex; /*align navigation horizontally*/
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background-color: #1a1a1a;
+        border-bottom: 1px solid #333;
+        height: 46px;
+    }
+
+    .page-title {
+        color: #fff;
+        font-size: 1.5rem;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    /*alert modal w semi transparent background*/
+    .alert-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000; /*makes sure element is on top*/
+    }
+
+    /*centered box w shadow - width 400 px*/
+    .alert-box {
+        background-color: #1a1a1a;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .alert-content {
+        padding: 16px;
+    }
+
+    /*header s posiioned with bottom border*/
+    .alert-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #333;
+    }
+
+    .alert-header h3 {
+        margin: 0;
+        color: #00ffff;
+    }
+
+    .close-button {
+        background: none;
+        border: none;
+        color: #e0e0e0;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    .alert-body {
+        margin-bottom: 16px;
+    }
+
+    .alert-footer {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 8px;
+        border-top: 1px solid #333;
+    }
+
+    .alert-footer button {
+        background-color: #333;
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .alert-footer button:hover {
+        background-color: #444;
+    }
+
+    .chart-title {
+        margin: 0 0 12px 0;
+        font-size: 1.2rem;
+        color: #00ffff;
+    }
+
+    /*make main content vertical )*/
+    @media (max-width: 1024px) {
+        .main-content {
+            flex-direction: column;
+        }
+
+        .right-section {
+            height: 300px;
+        }
+    }

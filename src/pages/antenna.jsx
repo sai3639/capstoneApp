@@ -1,112 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navigation from "./navigation"; //navigation bar component
-
+import Navigation from "./navigation.jsx"; //navigation bar component
+import "./css/antenna.css";
 
 //users can sumbit new logs
 //manage user authentication/session verification
 //table of availabel commands
 //can navigate to telemetry data page
 
-//styles
-const styles = `
-  body {
-    margin: 0;
-    padding: 0;
-    background-color: #18181b;
-    color: white;
-  }
 
-  .container {
-    min-height: 100vh;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-  }
 
-  .header {
-    font-size: 24px;
-    margin-bottom: 20px;
-    padding-top: 60px;
-  }
-
-  .table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-  }
-
-  .table th,
-  .table td {
-    padding: 10px;
-    border: 1px solid #3f3f46;
-    text-align: left;
-  }
-
-  .button {
-    background-color: #27272a;
-    padding: 8px 16px;
-    border-radius: 4px;
-    border: none;
-    color: white;
-    cursor: pointer;
-    margin-bottom: 20px;
-  }
-
-  .select {
-    width: 100%;
-    background-color: #27272a;
-    color: white;
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid #3f3f46;
-    margin-bottom: 16px;
-  }
-
-  .textarea {
-    width: 100%;
-    background-color: #27272a;
-    color: white;
-    padding: 16px;
-    border-radius: 4px;
-    border: 1px solid #3f3f46;
-    margin-bottom: 16px;
-    min-height: 150px;
-    resize: vertical;
-  }
-
-  .logs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 16px;
-    margin-top: 20px;
-  }
-
-  .log-card {
-    background-color: #27272a;
-    padding: 16px;
-    border-radius: 4px;
-  }
-
-  .log-title {
-    font-weight: bold;
-    margin-bottom: 8px;
-  }
-
-  .log-date {
-    font-size: 14px;
-    color: #a1a1aa;
-    margin-top: 8px;
-  }
-
-  .empty-logs {
-    text-align: center;
-    color: #71717a;
-    padding: 16px;
-  }
-`;
-
-const Antenna = ({ userType, callsign }) => {
+const Antenna = ({ setAuthenticated, setUserType, setCallsign, authenticated, userType, callsign }) => {
     const [telemetryData, setTelemetryData] = useState(""); //store telemetry data inputted from user
     const [logs, setLogs] = useState([]); //store telemetry logs
     const [selectedCallsign, setSelectedCallsign] = useState(callsign || ""); //store current selected callsgin
@@ -122,18 +26,17 @@ const Antenna = ({ userType, callsign }) => {
 
     const fetchLogs = async () => { //get log
         try {
-            console.log("Fetching logs..."); //indicates that logs are eing fetched
-            const response = await fetch("http://localhost:8888/logs", { //GEt request to get log
+            const res = await fetch("http://localhost:8888/api/logs", { //GEt request to get log
                 credentials: "include" //ensure cookies are sent with request
             });
 
             //if error - throw error with HTTP status
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`); //if request fails - error
+            if (!res.ok) {
+                throw new Error(`err: ${res.status}`); //if request fails - error
             }
 
             //parses json response 
-            const data = await response.json();
+            const data = await res.json();
           //  console.log("Fetched logs:", data);
             setLogs(data); //update logs state with data received
 
@@ -149,8 +52,8 @@ const Antenna = ({ userType, callsign }) => {
        // console.log("Filtered logs:", filtered); // Debug log
         setFilteredLogs(filtered); //update filteredLogs state w relevant logs
         } catch (error) {  //catch errorssss
-            console.error("Error fetching logs:", error);
-            alert(`Failed to fetch logs: ${error.message}`);
+            console.error("Error:", error);
+            alert(`could not get logs: ${error.message}`);
         }
     };
 
@@ -178,29 +81,32 @@ const Antenna = ({ userType, callsign }) => {
     useEffect(() => {
         const checkSession = async () => { 
             try {
-                const response = await fetch("http://localhost:8888/verify-session", { //send request to check user session
+                const res = await fetch("http://localhost:8888/api/verify-session", { //send request to check user session
                     method: 'GET',
                     credentials: "include" //cookies included w request
                 });
 
                 //check if response successful
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`); //error getting request
+                if (!res.ok) {
+                    throw new Error(`err: ${res.status}`); //error getting request
                 }
 
                 //parses json response from server and store in data variable
-                const data = await response.json();
+                const data = await res.json();
                 //if session valid - store callsign and sessionstatus = valid
                 if (data.success) {
                     setSelectedCallsign(data.callsign); //set selectedcallsign to callsign receied from server
                     setSessionStatus("valid"); //sessionstatus = valid
-                    console.log("Session is valid for callsign:", data.callsign); //log in console for debug
+                    setAuthenticated(true);
+                    setUserType("authenticated"); 
+                    setCallsign(data.callsign);
+                    console.log("callsign:", data.callsign); //log in console for debug
                 } else { //if invalid - then sessionstatus = invalid
                     setSessionStatus("invalid"); //session = invalid
-                    console.log("No active session"); //log in console
+                    console.log("guest"); //log in console
                 }
             } catch (error) { //error verifying session
-                console.error("Error verifying session:", error);
+                console.error("Error:", error);
                 setSessionStatus("error");
             }
         };
@@ -217,13 +123,13 @@ const Antenna = ({ userType, callsign }) => {
     const handleLogSubmit = async () => { //handle process of submitting log
         //if guest (no radio license) - cant add new log
         if (userType === "guest" || sessionStatus !== "valid") { //if user is guest
-            alert("Unable to add log. Please check your session and user type."); //display alert
+            alert("Unable to add log."); //display alert
             return; //return
         }
 
         try {
             //send POSt request w telemetry daata if new log made
-            const response = await fetch("http://localhost:8888/add-log", {
+            const res = await fetch("http://localhost:8888/api/add-log", {
                 method: "POST", //POST request 
                 credentials: "include", //cookies sent with request
                 headers: {
@@ -235,14 +141,14 @@ const Antenna = ({ userType, callsign }) => {
                 })
             });
 
-            const data = await response.json(); //parses JSON response from server and store in data variable
+            const data = await res.json(); //parses JSON response from server and store in data variable
             //if success - clear input and refresh the logs to show new ones
-            if (response.ok && data.success) { //check if response successfil and server indicates success
+            if (res.ok && data.success) { //check if response successfil and server indicates success
                 alert(data.message); //display alert - success
                 setTelemetryData(""); //clear data input
                 fetchLogs(); //refresh to update list of logs
             } else { //else error
-                alert(data.message || "Failed to add log");
+                alert(data.message || "Couldn't add log");
             }
         } catch (error) { //catch errors
             console.error("Error submitting log:", error);
@@ -257,11 +163,15 @@ const Antenna = ({ userType, callsign }) => {
     const uniqueCallsigns = [...new Set(logs.map((log) => log.callsign))];
 
     return (
-        <>
-            <style>{styles}</style>
+        
+            
             <div className="container">
                 <Navigation 
                 //render navigation bar
+                setAuthenticated={setAuthenticated}
+                setUserType={setUserType}
+                setCallsign={setCallsign}
+                isAuthenticated={authenticated}
                 />
                 
                 <h2 className="header">Space Telemetry Log</h2>
@@ -314,14 +224,18 @@ const Antenna = ({ userType, callsign }) => {
                         //updates selected call sign when new option is selected from dropdown
                         onChange={(e) => setSelectedCallsign(e.target.value)} 
                         className="select"
-                    >
                         
+                    >
+                        <option value="">Select a callsign</option>
                         {uniqueCallsigns.map((call, index) => (//loop over uniqueCallsigns array and redners option for eac
                         //unique key for each option
                         //value=call - set value of dropdown option to curent callsign
                         //call - displays callsign as option text
                             <option key={index} value={call}>{call}</option>
+                            
                         ))}
+                        
+
                     </select>
 
                     {userType === "authenticated" && (// text area and subit utton are shown only for validated users
@@ -371,7 +285,7 @@ const Antenna = ({ userType, callsign }) => {
                     )}
                 </div>
             </div>
-        </>
+        
     );
 };
 

@@ -7,6 +7,7 @@ import Loader from "../components/Loader"; //display loading animation
 import Sky  from "../models/Sky";
 import Cubes from "../models/cubes";
 import axios from 'axios';
+import './css/home.css';
 
 
 
@@ -37,7 +38,7 @@ const Home = () => {
       //start of try block - used to handle potential errors
       try {
         //uses fetch API to make HTTP GET request 
-        const response = await fetch("http://localhost:8888/voltages");
+        const response = await fetch("http://localhost:8888/api/voltages");
         //await makes javascript wait until request is complete and stores response in response
         //conversts response body (json format) into javascript obj
         //await = wait for conversion before continue
@@ -52,7 +53,7 @@ const Home = () => {
         setLatestVoltage(latestReading.volt);
         //if error - catch and log in console
       } catch (error) {
-        console.error("Error fetching voltage data:", error);
+        console.error("Error getting voltage data:", error);
       }
     };
     ///calls fetchLatestVoltage when useEffect runs
@@ -68,7 +69,7 @@ const Home = () => {
     const fetchPowerData = async () => {
         try{ //try block
           //get response using fetch API 
-            const response = await axios.get("http://localhost:8888/power");
+            const response = await axios.get("http://localhost:8888/api/power");
            
             const data = response.data; 
             //get latest power reading
@@ -77,7 +78,7 @@ const Home = () => {
             setLatestPower(latestReading.watt);
         
         } catch (error) { //catch error
-            console.error("Error fetching power data:", error);
+            console.error("Error getting power data:", error);
         }
     };
 
@@ -90,7 +91,7 @@ const Home = () => {
     const fetchLatestTelemetry = async () => {
       try {
         //get data
-        const response = await fetch("http://localhost:8888/logs");
+        const response = await fetch("http://localhost:8888/api/logs");
         //convert
         const data = await response.json();
         //extract wanted data
@@ -98,7 +99,7 @@ const Home = () => {
         //state update
         setLatestTelemetry(latestLog.telemetry_data); 
       } catch (error) { //catch error
-        console.error("Error fetching telemetry data:", error);
+        console.error("Error getting telemetry data:", error);
       }
     };
   
@@ -139,57 +140,41 @@ const Home = () => {
     //relative - child elements positioned absolutely inside it will be relaative to this section
     <section className="w-full h-screen relative">
       
-      <div //floating overlay box
-        style={{
-          position: 'absolute', //positions box relative to parent section
-          top: '10%', //move 10% down from top of parent
-          right: '15%', //move 15% away from right
-          width: '30%', //makes box 30% of parent width
-          height: 'auto', //heigh adjust based on content
-          backgroundColor: 'rgba(0, 0, 0, 0.7)', //semi transparent black background
-          color: 'white', //white text color
-          fontFamily: 'monospace', //font
-          padding: '20px',//adds space inside box
-          display: 'flex',//flexbox for easier layout control
-          flexDirection: 'column', //align vertically
-          alignItems: 'flex-start', //align text to left
-          justifyContent: 'flex-start', //align content to top
-          zIndex: 10,//box stays above other elements
-        }}
-      > 
+      <div className="status-box"> 
+
       
-        <p style={{ fontSize: '60px', margin: 0 }}>
+        <p className="title">
           Current Status
         </p>
         
         {latestVoltage !== null ? ( //checks if latestVoltage is available - if yes then show data if none then show it loading
-          <p style={{ fontSize: '40px', marginTop: '20px' }}>
+          <p className="reading">
             Latest Voltage: {latestVoltage} V
           </p>
         ) : (
-          <p style={{ fontSize: '40px', marginTop: '20px' }}>
+          <p className="reading">
             Loading latest voltage...
           </p>
         )}
         {latestPower !== null ? ( //displays latest power reading if there is data else loading 
-          <p style={{ fontSize: '40px', marginTop: '10px' }}>
+          <p className="reading">
             Latest Power: {latestPower} W
           </p>
         ) : (
-          <p style={{ fontSize: '40px', marginTop: '10px' }}>
+          <p className="reading">
             Loading latest power...
           </p>
         )}
                   {latestTelemetry !== null ? ( //displays latest log else loading
-            <p style={{ fontSize: '40px', marginTop: '10px' }}>
+            <p className="reading">
               Latest Telemetry: {latestTelemetry}
             </p>
           ) : (
-            <p style={{ fontSize: '40px', marginTop: '10px' }}>
+            <p className="reading">
               Loading latest telemetry...
             </p>
           )}
-        <p style={{ fontSize: '40px', marginTop: '10px' }}>
+        <p className="reading">
           Operational Status: <span style={{ fontWeight: 'bold' }}>Standby</span>
         </p>
       </div>

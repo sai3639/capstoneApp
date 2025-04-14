@@ -7,31 +7,23 @@ import Batteries from '../models/batteries.jsx';
 import { OrbitControls } from "@react-three/drei"; //rotate camera around 3d obj
 import { useNavigate } from 'react-router-dom';  
 import Navigation from './navigation.jsx'; //navigation component
+import "./css/power.css";
 
-const Power = () => {
+
+const Power = ({ setAuthenticated, setUserType, setCallsign, authenticated }) => {
     const [voltageData, setVoltageData] = useState([]); //stores array of voltage readings from API
     const [loading, setLoading] = useState(true); //indicates if data is still loading
     const [error, setError] = useState(null); //stores error messages
-    const [activeAlert, setActiveAlert] = useState(null); //stores alerts for low/hgih voltage
-    const navigate = useNavigate(); //redirect to other pages
+    const [alertMsg, setalertMsg] = useState(null); //stores alerts for low/hgih voltage
 
-    //adjust battery model based on screen width
-    const adjustBatteriesForScreenSize = () => {
-        let screenScale = null;  
-        let screenPosition = [-2, 3, -3] //position in 3d space
-        let rotation = [-2, -0.5, 1] //rotation in 3d space
-    
-        if(window.innerWidth < 768){
-            screenScale = [8, 8, 8]; //smaller scale for moile
-        }
-        else{
-            screenScale = [8, 8, 8]; //normal scale
-        }
-    
-        return [screenScale, screenPosition, rotation];
-    }
-    
-    const [batteriesScale, batteriesPosition, batteriesRotation] = adjustBatteriesForScreenSize();
+
+    //battery config
+    const battConfig = {
+        scale: [8, 8, 8], 
+        position: [-2, 3, -3],
+        rotation: [-2, -0.5, 1]
+    };
+   
 
     //sample data for chart
     //data = array of data points
@@ -55,37 +47,34 @@ const Power = () => {
         const fetchVoltageData = async () => {
             try {
                 //sends POST request
-                await axios.post('http://localhost:8888/add-voltage'); //adds new voltage entry 
+                await axios.post('http://localhost:8888/api/add-voltage'); //adds new voltage entry 
                 //gets voltage data
-                const response = await axios.get('http://localhost:8888/voltages');
-                const data = response.data.voltageData; //store retrieved voltage data
+                const res = await axios.get('http://localhost:8888/api/voltages');
+                const data = res.data.voltageData; //store retrieved voltage data
                 
                 //if issue detected variable will store alert message
-                let alertMessage = null;
                 //checks if data exists 
                 if (data && data.length > 0) {
-                    const latestRecord = data[data.length - 1]; //get latest voltage
+                    const latest = data[data.length - 1]; //get latest voltage
                     //isNaN checks if value is not a number
-                    if (typeof latestRecord.volt !== 'number' || isNaN(latestRecord.volt)) { //typeof checks if volt is not a number at all(null, string, etc)
+                    if (typeof latest.volt !== 'number' || isNaN(latest.volt)) { //typeof checks if volt is not a number at all(null, string, etc)
                         //NaN only works on values that js can convert into a number
-                        alertMessage = 'Error: Non-readable voltage detected!'; //if not send alert
+                        setalertMsg('Unreadable'); //if not send alert
                     } 
                     //if voltage too high or low trigger alert 
-                    else if (latestRecord.volt < 5) {
-                        alertMessage = 'Voltage too low!';
-                    } else if (latestRecord.volt > 10) {
-                        alertMessage = 'Voltage too high!';
+                    else if (latest.volt < 5) {
+                        setalertMsg('Voltage too low!');
+                    } else if (latest.volt > 10) {
+                        setalertMsg('Voltage too high!');
                     }
     
-                    if (alertMessage) {
-                        setActiveAlert(alertMessage); //show alert
-                    }
+                   
                 }
     
                 setVoltageData(data);
             } catch (err) {
                 setError(err.message);
-                setActiveAlert('Error fetching voltage data');
+                setalertMsg('Error getting voltage data');
             } finally {
                 setLoading(false);
             }
@@ -97,11 +86,11 @@ const Power = () => {
         //use await 
         
         //fetcb data  every 5 secs
-        const intervalId = setInterval(() => {
+        const interval = setInterval(() => {
             const fetchData = async () => { //get data from backend
                 try {
-                    const response = await axios.get('http://localhost:8888/voltages'); //GEt request
-                    setVoltageData(response.data.voltageData); //state setter - updates voltageData state - rerender to show latest reading
+                    const res = await axios.get('http://localhost:8888/api/voltages'); //GEt request
+                    setVoltageData(res.data.voltageData); //state setter - updates voltageData state - rerender to show latest reading
                 } catch (err) {
                     setError(err.message);
                 }
@@ -109,29 +98,27 @@ const Power = () => {
             fetchData(); //calls function before waiting
         }, 5000);
     
-        return () => clearInterval(intervalId); //cleared when component unmounts 
+        return () => clearInterval(interval); //cleared when component unmounts 
     }, []);
 //mount component = added to react DOM and becomes visible on screen (component first loads or rerenders)
 //unmounts - removes from react DOM - user navigates to other page 
-    const handleAlertClose = () => {
-        setActiveAlert(null);
-    }
+    
 
     //create alert 
     //displays alert popup when issue
-    const AlertModal = ({ message, onClose }) => {
+    const Alert = ({ message, onClose }) => {
         return (
             //overlay - darkens background
             <div className="alert-overlay">
                 
-                <div className="alert-modal"
+                <div className="alert-box"
                     //alert box centered on screen
                 > 
                     <div className="alert-content">
                         <div className="alert-header">
                             <h3>System Alert</h3>
                             <button className="close-button" 
-                            //onClose - removes modal
+                            //onClose - removes box
                             onClick={onClose}>×</button> 
                         </div>
                         <div className="alert-body">
@@ -232,16 +219,20 @@ const Power = () => {
 
     return (
         <div className="power-container">
-            {activeAlert && (
-                <AlertModal //display alert if activeAlert is not null
-                    message={activeAlert} //show alert message
-                    onClose={handleAlertClose} //close alert when clicked
+            {alertMsg && (
+                <Alert //display alert if alertMsg is not null
+                    message={alertMsg} //show alert message
+                    onClose={() => setalertMsg(null)} //close alert when clicked
                 />
             )}
             
             <div className="top-bar"> 
                 <Navigation 
                 //navigation bar 
+                setAuthenticated={setAuthenticated}
+                setUserType={setUserType}
+                setCallsign={setCallsign}
+                isAuthenticated={authenticated}
                 />
                 <h1 className="page-title">Power System</h1>
             </div>
@@ -274,9 +265,9 @@ const Power = () => {
                             <directionalLight position={[4, -3, 1]} intensity={0.5} />
 
                             <Batteries 
-                                position={batteriesPosition} //position battery
-                                scale={batteriesScale} //scale it
-                                rotation={batteriesRotation} //rotate model
+                                position={battConfig.position} //position battery
+                                scale={battConfig.scale} //scale it
+                                rotation={battConfig.rotation} //rotate model
                             />
                             <OrbitControls
                             //can rotate and zoom the model
@@ -329,218 +320,7 @@ const Power = () => {
                 </div>
             </div>
             
-            <style>{` 
-                body {
-                    background-color: #121212; /* dark background*/
-                    color: #e0e0e0; /* light grey teext */
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 
-                                'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 
-                                'Helvetica Neue', sans-serif; /*fonts*/
-                    margin: 0; /*remove default spacing*/
-                    padding: 0; /*remove defaalt spacing */
-                    overflow: hidden; /*prevent scrolling */
-                } 
-
-                .power-container {
-                    display: flex; 
-                    flex-direction: column; /*stack elements vertically*/
-                    height: 100vh; /*fill entire screen heiht*/
-                    background-color: #121212; /*dark background*/
-                }
-
-                .main-content {
-                    display: flex; /*horizontal layout*/
-                    gap: 16px; /*add spacing between components*/
-                    padding: 16px; /*add internal spacing*/
-                    height: calc(100vh - 70px); /* account for top bar - exclude */
-                }
-
-                .left-section {
-                    flex: 1.6; /*takes more space*/
-                    display: flex;
-                    flex-direction: column; /*vertical layout*/
-                    gap: 16px;
-                }
-
-                .right-section {
-                    flex: 0.8;
-                    display: flex;
-                }
-
-                .chart-section {
-                    flex: 1; /*take equal space in container*/
-                    background-color: #1a1a1a; /*dark background*/
-                    border-radius: 8px; /*round corners*/
-                    padding: 16px; /*spacing inside cointainer*/
-                    height: 45%; /*limit height to 45% of its parent*/
-                }
-
-                .chart-container {
-                    height: calc(100% - 30px); /*reverses 30px for title*/
-                    width: 100%; /*full width*/
-                }
-
-                .battery-section {
-                    flex: 1; /*equal space*/
-                    height: 45%; /*consisten height*/
-                    background-color: #1a1a1a;
-                    border-radius: 8px;
-                    overflow: hidden; /*prevents scrolling issues*/
-                }
-
-                .battery-canvas {
-                    width: 100% !important; /*forces full width and height*/
-                    height: 100% !important; /*!important overrides other styles*/
-                }
-
-                .table-container {
-                /*voltage table*/
-                    flex: 1;
-                    background-color: #1a1a1a;
-                    border-radius: 8px;
-                    padding: 16px;
-                    overflow: auto;
-                }
-
-                .voltage-table {
-                /*voltage table styling*/
-                    width: 100%;
-                    border-collapse: collapse; /*removes space between table borders*/
-                    background-color: #1a1a1a;
-                    font-size: 0.9rem; 
-                }
-
-                /*defines spacing and alignment for cells*/
-                .voltage-table th,
-                .voltage-table td {
-                    padding: 8px;
-                    text-align: left;
-                    border-bottom: 1px solid #333;
-                }
-
-                .voltage-table th {
-                    background-color: #252525;
-                    color: #00ffff;
-                    font-weight: 600;
-                    position: sticky; /*makes header stick to top when scrolling*/
-                    top: 0;
-                }
-
-                /*highlights rows when hovered*/
-                .voltage-table tr:hover {
-                    background-color: #252525;
-                }
-
-                .top-bar {
-                    display: flex; /*align navigation horizontally*/
-                    justify-content: space-between;
-                    align-items: center;
-                    padding: 12px 16px;
-                    background-color: #1a1a1a;
-                    border-bottom: 1px solid #333;
-                    height: 46px;
-                }
-
-                .page-title {
-                    color: #fff;
-                    font-size: 1.5rem;
-                    margin: 0;
-                    text-transform: uppercase;
-                    letter-spacing: 2px;
-                }
-
-                /*alert modal w semi transparent background*/
-                .alert-overlay {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background-color: rgba(0, 0, 0, 0.7);
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    z-index: 1000; /*makes sure element is on top*/
-                }
-
-                /*centered box w shadow - width 400 px*/
-                .alert-modal {
-                    background-color: #1a1a1a;
-                    border-radius: 8px;
-                    width: 90%;
-                    max-width: 400px;
-                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-                }
-
-                .alert-content {
-                    padding: 16px;
-                }
-
-                /*header can be flexibiliy posiioned with bottom border*/
-                .alert-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 16px;
-                    padding-bottom: 8px;
-                    border-bottom: 1px solid #333;
-                }
-
-                .alert-header h3 {
-                    margin: 0;
-                    color: #00ffff;
-                }
-
-                .close-button {
-                    background: none;
-                    border: none;
-                    color: #e0e0e0;
-                    font-size: 1.5rem;
-                    cursor: pointer;
-                    padding: 0;
-                }
-
-                .alert-body {
-                    margin-bottom: 16px;
-                }
-
-                .alert-footer {
-                    display: flex;
-                    justify-content: flex-end;
-                    padding-top: 8px;
-                    border-top: 1px solid #333;
-                }
-
-                .alert-footer button {
-                    background-color: #333;
-                    color: #fff;
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                }
-
-                .alert-footer button:hover {
-                    background-color: #444;
-                }
-
-                .chart-title {
-                    margin: 0 0 12px 0;
-                    font-size: 1.2rem;
-                    color: #00ffff;
-                }
-
-                /*make main content vertical and shrink in height (mobile)*/
-                @media (max-width: 1024px) {
-                    .main-content {
-                        flex-direction: column;
-                    }
-
-                    .right-section {
-                        height: 300px;
-                    }
-                }
-            `}</style>
+         
         </div>
     );
 };
