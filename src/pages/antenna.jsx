@@ -167,6 +167,7 @@ const Antenna = ({ setAuthenticated, setUserType, setCallsign, authenticated, us
             
             <div className="container">
                 <Navigation 
+                key={authenticated ? "auth" : "guest"}
                 //render navigation bar
                 setAuthenticated={setAuthenticated}
                 setUserType={setUserType}

@@ -16,7 +16,7 @@ const TelemetryData = ({ setAuthenticated, setUserType, setCallsign, authenticat
     const [error, setError] = useState(null); //store errors
     const [plots, setPlots] = useState([]); //store path to plot images
     const [recordingStatus, setRecordingStatus] = useState('idle'); //tracks current status of recording: idle, recording, stopped
-
+    const [stopTime, setStopTime] = useState(null);
   
 
 
@@ -72,8 +72,13 @@ const TelemetryData = ({ setAuthenticated, setUserType, setCallsign, authenticat
         try {
             setLoading(true);
             setError(null);
-            const response = await axios.get('http://localhost:8888/api/stop-recording', { //SEnd GET request to stop
-                withCredentials: true
+
+            const timestamp = new Date().toLocaleString();
+
+            const response = await axios.post('http://localhost:8888/api/stop-recording', { //SEnd GET request to stop
+               
+                timestamp},
+                {withCredentials: true
             });
             
             
@@ -81,6 +86,7 @@ const TelemetryData = ({ setAuthenticated, setUserType, setCallsign, authenticat
             if (response.data.success) { 
                 setRecording(false);
                 setRecordingStatus('stopped');
+                setStopTime(response.data.timestamp)
             } else { //if error - log error 
                 throw new Error(response.data.error || 'failed');
             }
@@ -216,27 +222,39 @@ const TelemetryData = ({ setAuthenticated, setUserType, setCallsign, authenticat
                                         <>
                                             <h3 className="subHeading">Binary Data</h3>
                                             <p className="binaryMessage">
-                                                {entry.binary_data}
+                                            {Array.isArray(entry.binary_data.data)
+                                                ? String.fromCharCode(...entry.binary_data.data)
+                                                : JSON.stringify(entry.binary_data)}
                                             </p>
                                         </>
                                     )}
+                                   
                                     <p className="timestamp"
                                     //converts created_at timestamp of entry into readable format
                                     >
                                         {new Date(entry.created_at).toLocaleString()}
                                     </p>
+                                    
                                 </div>
-                                {entry.plot_path && (//checks if plot path is associated w telemetry entry
-                                    <div>
-                                        <h3 className="subHeading">Analysis Plot</h3>
-                                        <img //if plot path exit - display image 
-                                        //dynamically constructs image URL based on plot path data
-                                            src={`http://localhost:8888/api/${entry.plot_path}`}
-                                            alt="Frequency Analysis"
-                                            className="image"
+                                <div>
+                                    {console.log(entry.goertzelPlotPath )}
+                                    <h3 className="subHeading">Analysis Plots</h3>
+                                    {entry.plot_path && (
+                                        <img
+                                        src={`http://localhost:8888/${entry.plot_path}`}
+                                        alt="Audio Analysis"
+                                        className="image"
                                         />
+                                    )}
+                                    {entry.goertzelPlotPath  && (
+                                        <img
+                                        src={`http://localhost:8888/${entry.goertzelPlotPath }`}
+                                        alt="Goertzel Power Plot"
+                                        className="image"
+                                        />
+                                    )}
                                     </div>
-                                )}
+
                             </div>
                         </div>
                     ))}

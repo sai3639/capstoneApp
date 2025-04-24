@@ -32,8 +32,9 @@ const Navigation = ({ setAuthenticated, setUserType, setCallsign, isAuthenticate
             setAuthenticated(false);
             setUserType(null);
             setCallsign(null);
+            
 
-            navigate("/"); // go back to login page
+            //navigate("/"); // go back to login page
         } catch (err) {
             console.error("Logout error:", err);
         }
