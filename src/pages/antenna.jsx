@@ -29,7 +29,7 @@ const Antenna = ({ setAuthenticated, setUserType, setCallsign, authenticated, us
 
     const fetchLogs = async () => { //get log
         try {
-            const res = await fetch(`${apiUrl}/api/add-log`, { //GEt request to get log
+            const res = await fetch(`${apiUrl}/api/add-logs`, { //GEt request to get log
                 credentials: "include" //ensure cookies are sent with request
             });
 
@@ -132,7 +132,7 @@ const Antenna = ({ setAuthenticated, setUserType, setCallsign, authenticated, us
 
         try {
             //send POSt request w telemetry daata if new log made
-            const res = await fetch(`${apiUrl}/api/add-log`, {
+            const res = await fetch(`${apiUrl}/api/add-logs`, {
                 method: "POST", //POST request 
                 credentials: "include", //cookies sent with request
                 headers: {
