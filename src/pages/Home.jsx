@@ -92,7 +92,7 @@ const Home = () => {
     const fetchLatestTelemetry = async () => {
       try {
         //get data
-        const response = await fetch(`${apiUrl}/api/add-logs`);
+        const response = await fetch(`${apiUrl}/api/log/add-logs`);
         //convert
         const data = await response.json();
         //extract wanted data
