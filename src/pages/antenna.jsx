@@ -139,7 +139,7 @@ const Antenna = ({ setAuthenticated, setUserType, setCallsign, authenticated, us
                     "Content-Type": "application/json" ///request body is in JSON format
                 },
                 body: JSON.stringify({ //conoverts data to JSON format to sned in request body
-                    callsign: selectedCallsign, //callsign of user submitting log
+                   // callsign: selectedCallsign, //callsign of user submitting log
                     telemetry_data: telemetryData //telemetry data enetered by user
                 })
             });
