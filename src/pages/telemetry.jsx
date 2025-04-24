@@ -73,12 +73,10 @@ const TelemetryData = ({ setAuthenticated, setUserType, setCallsign, authenticat
             setLoading(true);
             setError(null);
 
-            const timestamp = new Date().toLocaleString();
 
-            const response = await axios.post(`${apiUrl}/api/stop-recording`, { //SEnd GET request to stop
-               
-                timestamp},
-                {withCredentials: true
+            const response = await axios.get(`${apiUrl}/api/stop-recording`, { //SEnd GET request to stop
+            
+                withCredentials: true
             });
             
             
