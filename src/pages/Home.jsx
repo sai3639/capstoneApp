@@ -30,6 +30,7 @@ const Home = () => {
 
 
   const [isHovered, setIsHovered] = useState(false);
+  const apiUrl = import.meta.env.VITE_API_URL;
 
 //fetches voltage data from /voltage endpoint
   useEffect(() => { //runs once when component mounts
@@ -38,7 +39,7 @@ const Home = () => {
       //start of try block - used to handle potential errors
       try {
         //uses fetch API to make HTTP GET request 
-        const response = await fetch("http://localhost:8888/api/voltages");
+        const response = await fetch(`${apiUrl}/api/voltages`);
         //await makes javascript wait until request is complete and stores response in response
         //conversts response body (json format) into javascript obj
         //await = wait for conversion before continue
@@ -69,7 +70,7 @@ const Home = () => {
     const fetchPowerData = async () => {
         try{ //try block
           //get response using fetch API 
-            const response = await axios.get("http://localhost:8888/api/power");
+            const response = await axios.get(`${apiUrl}/api/power`);
            
             const data = response.data; 
             //get latest power reading
@@ -91,7 +92,7 @@ const Home = () => {
     const fetchLatestTelemetry = async () => {
       try {
         //get data
-        const response = await fetch("http://localhost:8888/api/logs");
+        const response = await fetch(`${apiUrl}/api/add-log`);
         //convert
         const data = await response.json();
         //extract wanted data

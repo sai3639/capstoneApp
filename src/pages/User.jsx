@@ -7,13 +7,13 @@ const User = ({ setAuthenticated, setUserType, setCallsign }) => {
     const [callsignInput, setCallsignInput] = useState(""); //stores temporary callsign input value
     const [error, setError] = useState("");//stoes error messaeges for display
     const navigate = useNavigate();//navigation function
-
+    const apiUrl = import.meta.env.VITE_API_URL;
     // Check for existing session on component mount
     useEffect(() => {
          //checks w backend for existing valid session cookies
         const verifySession = async () => {
         try {
-            const response = await fetch("http://localhost:8888/api/verify-session", {//GET response to verify if valid session exists
+            const response = await fetch(`${apiUrl}/api/verify-session`, {//GET response to verify if valid session exists
                 credentials: "include"//include cookies
             });
             const data = await response.json();
@@ -37,7 +37,7 @@ const User = ({ setAuthenticated, setUserType, setCallsign }) => {
 
     const handleAuthenticate = async () => {
         try {
-            const res = await fetch("http://localhost:8888/api/authenticate-callsign", {//sends entered callsign to backend for authentication
+            const res = await fetch(`${apiUrl}/api/authenticate-callsign`, {//sends entered callsign to backend for authentication
                 method: "POST", //send POST request to backend
                 headers: { "Content-Type": "application/json" }, 
                 body: JSON.stringify({ callsign: callsignInput }),

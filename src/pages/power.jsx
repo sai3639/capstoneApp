@@ -23,7 +23,7 @@ const Power = ({ setAuthenticated, setUserType, setCallsign, authenticated }) =>
         position: [-2, 3, -3],
         rotation: [-2, -0.5, 1]
     };
-   
+    const apiUrl = import.meta.env.VITE_API_URL;
 
     //sample data for chart
     //data = array of data points
@@ -47,9 +47,9 @@ const Power = ({ setAuthenticated, setUserType, setCallsign, authenticated }) =>
         const fetchVoltageData = async () => {
             try {
                 //sends POST request
-                await axios.post('http://localhost:8888/api/add-voltage'); //adds new voltage entry 
+                await axios.post(`${apiUrl}/api/add-voltage`); //adds new voltage entry 
                 //gets voltage data
-                const res = await axios.get('http://localhost:8888/api/voltages');
+                const res = await axios.get(`${apiUrl}/api/voltages`);
                 const data = res.data.voltageData; //store retrieved voltage data
                 
                 //if issue detected variable will store alert message
@@ -89,7 +89,7 @@ const Power = ({ setAuthenticated, setUserType, setCallsign, authenticated }) =>
         const interval = setInterval(() => {
             const fetchData = async () => { //get data from backend
                 try {
-                    const res = await axios.get('http://localhost:8888/api/voltages'); //GEt request
+                    const res = await axios.get(`${apiUrl}/api/voltages`); //GEt request
                     setVoltageData(res.data.voltageData); //state setter - updates voltageData state - rerender to show latest reading
                 } catch (err) {
                     setError(err.message);

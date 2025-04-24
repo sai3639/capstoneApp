@@ -18,6 +18,9 @@ const Antenna = ({ setAuthenticated, setUserType, setCallsign, authenticated, us
     const [sessionStatus, setSessionStatus] = useState(null); //track if session is valid, invalid, or an error occurred
     const navigate = useNavigate(); //navigate to differenet pages
 
+    
+    const apiUrl = import.meta.env.VITE_API_URL;
+
     //defining available commands
     const commandTable = [
         { command: "Deploy Antenna", description: "Unfold antennas on CubeSat" },
@@ -26,7 +29,7 @@ const Antenna = ({ setAuthenticated, setUserType, setCallsign, authenticated, us
 
     const fetchLogs = async () => { //get log
         try {
-            const res = await fetch("http://localhost:8888/api/logs", { //GEt request to get log
+            const res = await fetch(`${apiUrl}/api/add-log`, { //GEt request to get log
                 credentials: "include" //ensure cookies are sent with request
             });
 
@@ -81,7 +84,7 @@ const Antenna = ({ setAuthenticated, setUserType, setCallsign, authenticated, us
     useEffect(() => {
         const checkSession = async () => { 
             try {
-                const res = await fetch("http://localhost:8888/api/verify-session", { //send request to check user session
+                const res = await fetch(`${apiUrl}/api/verify-session`, { //send request to check user session
                     method: 'GET',
                     credentials: "include" //cookies included w request
                 });
@@ -129,7 +132,7 @@ const Antenna = ({ setAuthenticated, setUserType, setCallsign, authenticated, us
 
         try {
             //send POSt request w telemetry daata if new log made
-            const res = await fetch("http://localhost:8888/api/add-log", {
+            const res = await fetch(`${apiUrl}/api/add-log`, {
                 method: "POST", //POST request 
                 credentials: "include", //cookies sent with request
                 headers: {

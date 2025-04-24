@@ -22,7 +22,7 @@ const Solar = ({ setAuthenticated, setUserType, setCallsign, authenticated}) => 
         position: [-2, 3, -3],
         rotation: [-2, -0.5, 1]
     };
-
+    const apiUrl = import.meta.env.VITE_API_URL;
 
 
     //data sampling function
@@ -37,8 +37,8 @@ const Solar = ({ setAuthenticated, setUserType, setCallsign, authenticated}) => 
             try {
 
                 //fetches power data by sending POSt request to add power and GET request to power
-                await axios.post('http://localhost:8888/api/add-power');
-                const response = await axios.get("http://localhost:8888/api/power");
+                await axios.post(`${apiUrl}/api/add-power`);
+                const response = await axios.get(`${apiUrl}/api/power`);
 
                 //if data fetched successfully - processes data 
                 if (response.data && response.data.powerData) {

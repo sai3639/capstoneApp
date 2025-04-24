@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';  //hook from React Router to nav
 //navigatio component to provide buttons to go to different pages
 const Navigation = ({ setAuthenticated, setUserType, setCallsign, isAuthenticated, userType }) => {
     const navigate = useNavigate();
+    const apiUrl = import.meta.env.VITE_API_URL;
 
     const styles = {
     //styles
@@ -24,7 +25,7 @@ const Navigation = ({ setAuthenticated, setUserType, setCallsign, isAuthenticate
 
     const handleLogout = async () => {
         try {
-            await fetch("http://localhost:8888/api/logout", {
+            await fetch(`${apiUrl}/api/logout`, {
                 method: "POST",
                 credentials: "include"
             });

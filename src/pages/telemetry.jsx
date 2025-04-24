@@ -18,7 +18,7 @@ const TelemetryData = ({ setAuthenticated, setUserType, setCallsign, authenticat
     const [recordingStatus, setRecordingStatus] = useState('idle'); //tracks current status of recording: idle, recording, stopped
     const [stopTime, setStopTime] = useState(null);
   
-
+    const apiUrl = import.meta.env.VITE_API_URL;
 
 //mounting - rendering component and inseriting into DOM 
 //react needs to know when to initalize a component - set state, fetch data 
@@ -47,7 +47,7 @@ const TelemetryData = ({ setAuthenticated, setUserType, setCallsign, authenticat
             
             
 
-            const response = await axios.get('http://localhost:8888/api/start-recording', { //send GET request to start recroding
+            const response = await axios.get(`${apiUrl}/api/start-recording`, { //send GET request to start recroding
                 withCredentials: true
             });
             
@@ -75,7 +75,7 @@ const TelemetryData = ({ setAuthenticated, setUserType, setCallsign, authenticat
 
             const timestamp = new Date().toLocaleString();
 
-            const response = await axios.post('http://localhost:8888/api/stop-recording', { //SEnd GET request to stop
+            const response = await axios.post(`${apiUrl}/api/stop-recording`, { //SEnd GET request to stop
                
                 timestamp},
                 {withCredentials: true
@@ -105,7 +105,7 @@ const TelemetryData = ({ setAuthenticated, setUserType, setCallsign, authenticat
         try {
             
     
-            const response = await axios.get("http://localhost:8888/api/telemetry", { params });
+            const response = await axios.get(`${apiUrl}/api/telemetry`, { params });
             console.log(response.data);
             if (Array.isArray(response.data)) {
                 setTelemetry(response.data);
@@ -241,14 +241,14 @@ const TelemetryData = ({ setAuthenticated, setUserType, setCallsign, authenticat
                                     <h3 className="subHeading">Analysis Plots</h3>
                                     {entry.plot_path && (
                                         <img
-                                        src={`http://localhost:8888/${entry.plot_path}`}
+                                        src={`${apiUrl}/${entry.plot_path}`}
                                         alt="Audio Analysis"
                                         className="image"
                                         />
                                     )}
                                     {entry.goertzelPlotPath  && (
                                         <img
-                                        src={`http://localhost:8888/${entry.goertzelPlotPath }`}
+                                        src={`${apiUrl}/${entry.plot_path}`}
                                         alt="Goertzel Power Plot"
                                         className="image"
                                         />
