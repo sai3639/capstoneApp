@@ -132,7 +132,7 @@ const Antenna = ({ setAuthenticated, setUserType, setCallsign, authenticated, us
 
         try {
             //send POSt request w telemetry daata if new log made
-            const res = await fetch(`${apiUrl}/api/add-logs`, {
+            const res = await fetch(`${apiUrl}/api/add-log`, {
                 method: "POST", //POST request 
                 credentials: "include", //cookies sent with request
                 headers: {
